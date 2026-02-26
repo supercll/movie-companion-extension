@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.2.0](https://github-lc/supercll/movie-companion-extension/compare/v2.1.1...v2.2.0) (2026-02-26)
+
+### ✨ Features
+
+* enhance video detection and UI components ([8443bd9](https://github-lc/supercll/movie-companion-extension/commit/8443bd9bd73a21b173a31d76fc73b4d70bb915d3))
+
 ## [2.1.1](https://github-lc/supercll/movie-companion-extension/compare/v2.1.0...v2.1.1) (2026-02-26)
 
 ### 🏠 Chores
