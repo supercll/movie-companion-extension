@@ -1,5 +1,7 @@
 # 观影伴侣 - Movie Companion
 
+[English](./README_en.md) ｜ 中文
+
 Chrome 浏览器扩展，为视频网站提供截图、GIF 录制和视频录制功能。
 
 ## 功能特性
@@ -85,3 +87,16 @@ pnpm release
 ## 支持的网站
 
 任何包含 `<video>` 标签的网页，包括 YouTube、Bilibili、Netflix、爱奇艺等。
+
+## 技术栈
+
+- [WXT](https://wxt.dev/) - 浏览器扩展开发框架
+- [Vue 3](https://vuejs.org/) - UI 框架
+- [TypeScript](https://www.typescriptlang.org/) - 类型安全
+- [Tailwind CSS](https://tailwindcss.com/) - 样式
+- [modern-gif](https://github.com/nichenqin/modern-gif) - GIF 编码
+- [vue-i18n](https://vue-i18n.intlify.dev/) - 国际化
+
+## 许可证
+
+本项目基于 [MIT License](./LICENSE) 开源。

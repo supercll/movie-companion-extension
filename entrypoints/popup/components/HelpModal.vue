@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const emit = defineEmits<{
-  close: [];
-}>();
+  close: []
+}>()
 </script>
 
 <template>
@@ -13,11 +13,15 @@ const emit = defineEmits<{
       class="bg-[#1a1a2e] rounded-2xl p-5 w-80 max-h-[400px] overflow-y-auto"
       @click.stop
     >
-      <h3 class="text-violet-400 mb-3 text-base font-semibold">{{ $t('help.title') }}</h3>
+      <h3 class="text-violet-400 mb-3 text-base font-semibold">
+        {{ $t('help.title') }}
+      </h3>
 
       <div class="space-y-3 text-[13px]">
         <div>
-          <p class="text-gray-300 font-medium mb-1">{{ $t('help.basicUsage') }}</p>
+          <p class="text-gray-300 font-medium mb-1">
+            {{ $t('help.basicUsage') }}
+          </p>
           <ul class="list-disc pl-4 space-y-1 text-xs text-gray-400">
             <li>{{ $t('help.basicStep1') }}</li>
             <li>{{ $t('help.basicStep2') }}</li>
@@ -26,7 +30,9 @@ const emit = defineEmits<{
         </div>
 
         <div>
-          <p class="text-gray-300 font-medium mb-1">{{ $t('help.shortcuts') }}</p>
+          <p class="text-gray-300 font-medium mb-1">
+            {{ $t('help.shortcuts') }}
+          </p>
           <ul class="list-disc pl-4 space-y-1 text-xs text-gray-400">
             <li>
               <kbd class="bg-[#0f0f1a] px-1.5 py-0.5 rounded text-[11px] border border-gray-700 text-violet-400">Alt+S</kbd>
@@ -48,7 +54,9 @@ const emit = defineEmits<{
         </div>
 
         <div>
-          <p class="text-gray-300 font-medium mb-1">{{ $t('help.supportedSites') }}</p>
+          <p class="text-gray-300 font-medium mb-1">
+            {{ $t('help.supportedSites') }}
+          </p>
           <ul class="list-disc pl-4 space-y-1 text-xs text-gray-400">
             <li>{{ $t('help.siteList') }}</li>
             <li>{{ $t('help.siteAny') }}</li>

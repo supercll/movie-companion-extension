@@ -1,4 +1,4 @@
-import type { Settings } from './types';
+import type { Settings } from './types'
 
 export const DEFAULT_SETTINGS: Settings = {
   locale: 'auto',
@@ -10,4 +10,4 @@ export const DEFAULT_SETTINGS: Settings = {
   videoDuration: 10,
   videoFormat: 'auto',
   videoBitrate: 2500,
-};
+}

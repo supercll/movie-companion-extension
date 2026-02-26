@@ -1,9 +1,9 @@
 <script setup lang="ts">
 defineProps<{
-  text: string;
-  active: boolean;
-  recording?: boolean;
-}>();
+  text: string
+  active: boolean
+  recording?: boolean
+}>()
 </script>
 
 <template>

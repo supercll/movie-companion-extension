@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { Settings as SettingsIcon, X } from 'lucide-vue-next';
-import type { Settings } from '@/utils/types';
+import type { Settings } from '@/utils/types'
+import { Settings as SettingsIcon, X } from 'lucide-vue-next'
 
 defineProps<{
-  settings: Settings;
-}>();
+  settings: Settings
+}>()
 
 const emit = defineEmits<{
-  update: [patch: Partial<Settings>];
-  close: [];
-}>();
+  update: [patch: Partial<Settings>]
+  close: []
+}>()
 </script>
 
 <template>
@@ -25,7 +25,9 @@ const emit = defineEmits<{
       <div class="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[#2a2a4a]">
         <div class="flex items-center gap-2 text-violet-400">
           <SettingsIcon :size="18" />
-          <h3 class="text-base font-semibold">{{ $t('settings.title') }}</h3>
+          <h3 class="text-base font-semibold">
+            {{ $t('settings.title') }}
+          </h3>
         </div>
         <button
           class="bg-transparent border-none text-gray-500 cursor-pointer p-1 rounded-lg hover:bg-[#1a1a2e] hover:text-gray-300 transition-colors"
@@ -39,7 +41,9 @@ const emit = defineEmits<{
       <div class="flex-1 overflow-y-auto px-5 py-3 space-y-3">
         <!-- Language Settings -->
         <section class="bg-[#1a1a2e] rounded-xl p-3.5">
-          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">{{ $t('settings.language') }}</h2>
+          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
+            {{ $t('settings.language') }}
+          </h2>
           <div class="flex gap-2">
             <button
               v-for="opt in ([
@@ -61,7 +65,9 @@ const emit = defineEmits<{
 
         <!-- Screenshot Settings -->
         <section class="bg-[#1a1a2e] rounded-xl p-3.5">
-          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">{{ $t('settings.screenshotSettings') }}</h2>
+          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
+            {{ $t('settings.screenshotSettings') }}
+          </h2>
 
           <div class="flex items-center justify-between py-1.5">
             <label class="text-[13px] text-gray-400">{{ $t('settings.imageFormat') }}</label>
@@ -70,9 +76,15 @@ const emit = defineEmits<{
               class="px-2 py-1 bg-[#0f0f1a] border border-[#2a2a4a] rounded-md text-gray-200 text-xs outline-none"
               @change="emit('update', { imageFormat: ($event.target as HTMLSelectElement).value as Settings['imageFormat'] })"
             >
-              <option value="png">PNG</option>
-              <option value="jpeg">JPEG</option>
-              <option value="webp">WebP</option>
+              <option value="png">
+                PNG
+              </option>
+              <option value="jpeg">
+                JPEG
+              </option>
+              <option value="webp">
+                WebP
+              </option>
             </select>
           </div>
 
@@ -86,7 +98,7 @@ const emit = defineEmits<{
                 :value="settings.jpegQuality"
                 class="w-20 accent-violet-400"
                 @input="emit('update', { jpegQuality: +($event.target as HTMLInputElement).value })"
-              />
+              >
               <span class="text-xs text-violet-400 min-w-[30px] text-right">{{ settings.jpegQuality }}%</span>
             </div>
           </div>
@@ -94,7 +106,9 @@ const emit = defineEmits<{
 
         <!-- GIF Settings -->
         <section class="bg-[#1a1a2e] rounded-xl p-3.5">
-          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">{{ $t('settings.gifSettings') }}</h2>
+          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
+            {{ $t('settings.gifSettings') }}
+          </h2>
 
           <div class="flex items-center justify-between py-1.5">
             <label class="text-[13px] text-gray-400">{{ $t('settings.duration') }}</label>
@@ -106,7 +120,7 @@ const emit = defineEmits<{
                 :value="settings.gifDuration"
                 class="w-20 accent-violet-400"
                 @input="emit('update', { gifDuration: +($event.target as HTMLInputElement).value })"
-              />
+              >
               <span class="text-xs text-violet-400 min-w-[30px] text-right">{{ $t('settings.seconds', { n: settings.gifDuration }) }}</span>
             </div>
           </div>
@@ -121,7 +135,7 @@ const emit = defineEmits<{
                 :value="settings.gifFps"
                 class="w-20 accent-violet-400"
                 @input="emit('update', { gifFps: +($event.target as HTMLInputElement).value })"
-              />
+              >
               <span class="text-xs text-violet-400 min-w-[30px] text-right">{{ settings.gifFps }}fps</span>
             </div>
           </div>
@@ -133,16 +147,24 @@ const emit = defineEmits<{
               class="px-2 py-1 bg-[#0f0f1a] border border-[#2a2a4a] rounded-md text-gray-200 text-xs outline-none"
               @change="emit('update', { gifQuality: +($event.target as HTMLSelectElement).value })"
             >
-              <option :value="10">{{ $t('settings.qualityHigh') }}</option>
-              <option :value="15">{{ $t('settings.qualityMed') }}</option>
-              <option :value="20">{{ $t('settings.qualityLow') }}</option>
+              <option :value="10">
+                {{ $t('settings.qualityHigh') }}
+              </option>
+              <option :value="15">
+                {{ $t('settings.qualityMed') }}
+              </option>
+              <option :value="20">
+                {{ $t('settings.qualityLow') }}
+              </option>
             </select>
           </div>
         </section>
 
         <!-- Video Recording Settings -->
         <section class="bg-[#1a1a2e] rounded-xl p-3.5">
-          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">{{ $t('settings.videoSettings') }}</h2>
+          <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
+            {{ $t('settings.videoSettings') }}
+          </h2>
 
           <div class="flex items-center justify-between py-1.5">
             <label class="text-[13px] text-gray-400">{{ $t('settings.duration') }}</label>
@@ -155,7 +177,7 @@ const emit = defineEmits<{
                 :value="settings.videoDuration"
                 class="w-20 accent-violet-400"
                 @input="emit('update', { videoDuration: +($event.target as HTMLInputElement).value })"
-              />
+              >
               <span class="text-xs text-violet-400 min-w-[30px] text-right">{{ $t('settings.seconds', { n: settings.videoDuration }) }}</span>
             </div>
           </div>
@@ -167,11 +189,21 @@ const emit = defineEmits<{
               class="px-2 py-1 bg-[#0f0f1a] border border-[#2a2a4a] rounded-md text-gray-200 text-xs outline-none"
               @change="emit('update', { videoFormat: ($event.target as HTMLSelectElement).value as Settings['videoFormat'] })"
             >
-              <option value="auto">{{ $t('settings.autoBest') }}</option>
-              <option value="mp4">MP4 (H264)</option>
-              <option value="webm-vp9">WebM (VP9)</option>
-              <option value="webm-h264">WebM (H264)</option>
-              <option value="webm">WebM</option>
+              <option value="auto">
+                {{ $t('settings.autoBest') }}
+              </option>
+              <option value="mp4">
+                MP4 (H264)
+              </option>
+              <option value="webm-vp9">
+                WebM (VP9)
+              </option>
+              <option value="webm-h264">
+                WebM (H264)
+              </option>
+              <option value="webm">
+                WebM
+              </option>
             </select>
           </div>
 
@@ -186,7 +218,7 @@ const emit = defineEmits<{
                 :value="settings.videoBitrate"
                 class="w-20 accent-violet-400"
                 @input="emit('update', { videoBitrate: +($event.target as HTMLInputElement).value })"
-              />
+              >
               <span class="text-xs text-violet-400 min-w-[38px] text-right">{{ (settings.videoBitrate / 1000).toFixed(1) }}M</span>
             </div>
           </div>

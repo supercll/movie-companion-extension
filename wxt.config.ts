@@ -1,6 +1,6 @@
-import { defineConfig } from 'wxt';
-import tailwindcss from '@tailwindcss/vite';
-import pkg from './package.json';
+import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'wxt'
+import pkg from './package.json'
 
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
@@ -22,4 +22,4 @@ export default defineConfig({
       __APP_VERSION__: JSON.stringify(pkg.version),
     },
   }),
-});
+})

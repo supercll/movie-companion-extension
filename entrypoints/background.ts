@@ -5,11 +5,11 @@ export default defineBackground(() => {
         url: message.url,
         filename: message.filename,
       }).then((downloadId) => {
-        sendResponse({ success: true, downloadId });
+        sendResponse({ success: true, downloadId })
       }).catch((err: Error) => {
-        sendResponse({ success: false, error: err.message });
-      });
-      return true;
+        sendResponse({ success: false, error: err.message })
+      })
+      return true
     }
-  });
-});
+  })
+})

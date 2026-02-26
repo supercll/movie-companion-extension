@@ -1,94 +1,115 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { Clock, Camera, Circle, Video, AlertCircle } from 'lucide-vue-next';
-import { parseTimedInput, formatTime } from '@/utils/time-parser';
-import type { TimedActionType, VideoInfo } from '@/utils/types';
-
-const { t } = useI18n();
+import type { TimedActionType, VideoInfo } from '@/utils/types'
+import { AlertCircle, Camera, Circle, Clock, Video } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { formatTime, parseTimedInput } from '@/utils/time-parser'
 
 const props = defineProps<{
-  videoInfo: VideoInfo;
-}>();
+  videoInfo: VideoInfo
+}>()
 
 const emit = defineEmits<{
-  execute: [payload: { type: 'point'; action: TimedActionType; time: number }
-    | { type: 'range'; action: TimedActionType; start: number; end: number }
-    | { type: 'points'; action: TimedActionType; times: number[] }];
-}>();
+  execute: [payload: { type: 'point', action: TimedActionType, time: number }
+    | { type: 'range', action: TimedActionType, start: number, end: number }
+    | { type: 'points', action: TimedActionType, times: number[] }]
+}>()
 
-const timeInput = ref('');
-const action = ref<TimedActionType>('screenshot');
+const { t } = useI18n()
+
+const timeInput = ref('')
+const action = ref<TimedActionType>('screenshot')
 
 const parsed = computed(() => {
-  if (!timeInput.value.trim()) return null;
-  return parseTimedInput(timeInput.value);
-});
+  if (!timeInput.value.trim())
+    return null
+  return parseTimedInput(timeInput.value)
+})
 
 const validationError = computed(() => {
-  if (!timeInput.value.trim()) return null;
-  if (!parsed.value) return t('timed.errorUnrecognized');
+  if (!timeInput.value.trim())
+    return null
+  if (!parsed.value)
+    return t('timed.errorUnrecognized')
 
-  const duration = props.videoInfo.duration ?? 0;
-  if (duration <= 0) return null;
+  const duration = props.videoInfo.duration ?? 0
+  if (duration <= 0)
+    return null
 
   if (parsed.value.type === 'point') {
-    if (parsed.value.time > duration) return t('timed.errorExceedDuration', { time: formatTime(duration) });
-  } else if (parsed.value.type === 'range') {
-    if (parsed.value.end > duration) return t('timed.errorEndExceed', { time: formatTime(duration) });
-  } else if (parsed.value.type === 'points') {
-    const max = Math.max(...parsed.value.times);
-    if (max > duration) return t('timed.errorPointExceed', { time: formatTime(duration) });
+    if (parsed.value.time > duration)
+      return t('timed.errorExceedDuration', { time: formatTime(duration) })
   }
-  return null;
-});
+  else if (parsed.value.type === 'range') {
+    if (parsed.value.end > duration)
+      return t('timed.errorEndExceed', { time: formatTime(duration) })
+  }
+  else if (parsed.value.type === 'points') {
+    const max = Math.max(...parsed.value.times)
+    if (max > duration)
+      return t('timed.errorPointExceed', { time: formatTime(duration) })
+  }
+  return null
+})
 
 const description = computed(() => {
-  if (!parsed.value) return '';
-  const a = action.value;
+  if (!parsed.value)
+    return ''
+  const a = action.value
   if (parsed.value.type === 'point') {
-    if (a === 'screenshot') return t('timed.descScreenshotAt', { time: formatTime(parsed.value.time) });
-    return t('timed.descCannotRecordPoint');
+    if (a === 'screenshot')
+      return t('timed.descScreenshotAt', { time: formatTime(parsed.value.time) })
+    return t('timed.descCannotRecordPoint')
   }
   if (parsed.value.type === 'range') {
-    const dur = parsed.value.end - parsed.value.start;
-    const rangeLabel = `${formatTime(parsed.value.start)} - ${formatTime(parsed.value.end)}`;
-    if (a === 'screenshot') return t('timed.descScreenshotRange', { range: rangeLabel });
-    if (a === 'gif') return t('timed.descGifRange', { range: rangeLabel, n: dur.toFixed(1) });
-    return t('timed.descVideoRange', { range: rangeLabel, n: dur.toFixed(1) });
+    const dur = parsed.value.end - parsed.value.start
+    const rangeLabel = `${formatTime(parsed.value.start)} - ${formatTime(parsed.value.end)}`
+    if (a === 'screenshot')
+      return t('timed.descScreenshotRange', { range: rangeLabel })
+    if (a === 'gif')
+      return t('timed.descGifRange', { range: rangeLabel, n: dur.toFixed(1) })
+    return t('timed.descVideoRange', { range: rangeLabel, n: dur.toFixed(1) })
   }
   if (parsed.value.type === 'points') {
-    if (a === 'screenshot') return t('timed.descScreenshotPoints', { n: parsed.value.times.length });
-    return t('timed.descCannotRecordPoints');
+    if (a === 'screenshot')
+      return t('timed.descScreenshotPoints', { n: parsed.value.times.length })
+    return t('timed.descCannotRecordPoints')
   }
-  return '';
-});
+  return ''
+})
 
 const formatHintHtml = computed(() => {
-  const point = `<code class="text-gray-500">${t('timed.formatPoint')}</code>`;
-  const range = `<code class="text-gray-500">${t('timed.formatRange')}</code>`;
-  const multi = `<code class="text-gray-500">${t('timed.formatMulti')}</code>`;
-  return t('timed.formatHint', { point, range, multi });
-});
+  const point = `<code class="text-gray-500">${t('timed.formatPoint')}</code>`
+  const range = `<code class="text-gray-500">${t('timed.formatRange')}</code>`
+  const multi = `<code class="text-gray-500">${t('timed.formatMulti')}</code>`
+  return t('timed.formatHint', { point, range, multi })
+})
 
 const canExecute = computed(() => {
-  if (!props.videoInfo.hasVideo) return false;
-  if (!parsed.value || validationError.value) return false;
-  const a = action.value;
-  if (parsed.value.type === 'point' && a !== 'screenshot') return false;
-  if (parsed.value.type === 'points' && a !== 'screenshot') return false;
-  return true;
-});
+  if (!props.videoInfo.hasVideo)
+    return false
+  if (!parsed.value || validationError.value)
+    return false
+  const a = action.value
+  if (parsed.value.type === 'point' && a !== 'screenshot')
+    return false
+  if (parsed.value.type === 'points' && a !== 'screenshot')
+    return false
+  return true
+})
 
 function execute() {
-  if (!parsed.value || !canExecute.value) return;
+  if (!parsed.value || !canExecute.value)
+    return
 
   if (parsed.value.type === 'point') {
-    emit('execute', { type: 'point', action: action.value, time: parsed.value.time });
-  } else if (parsed.value.type === 'range') {
-    emit('execute', { type: 'range', action: action.value, start: parsed.value.start, end: parsed.value.end });
-  } else if (parsed.value.type === 'points') {
-    emit('execute', { type: 'points', action: action.value, times: parsed.value.times });
+    emit('execute', { type: 'point', action: action.value, time: parsed.value.time })
+  }
+  else if (parsed.value.type === 'range') {
+    emit('execute', { type: 'range', action: action.value, start: parsed.value.start, end: parsed.value.end })
+  }
+  else if (parsed.value.type === 'points') {
+    emit('execute', { type: 'points', action: action.value, times: parsed.value.times })
   }
 }
 </script>
@@ -125,7 +146,7 @@ function execute() {
         :disabled="!videoInfo.hasVideo"
         class="flex-1 px-2.5 py-2 bg-[#0f0f1a] border border-[#2a2a4a] rounded-lg text-gray-200 text-[13px] outline-none focus:border-violet-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         @keydown.enter="execute"
-      />
+      >
     </div>
 
     <!-- Action selector + Execute -->
@@ -136,7 +157,7 @@ function execute() {
           type="radio"
           value="screenshot"
           class="accent-violet-400"
-        />
+        >
         <Camera :size="14" class="text-gray-400" />
         <span class="text-xs text-gray-400">{{ $t('timed.screenshot') }}</span>
       </label>
@@ -147,7 +168,7 @@ function execute() {
           type="radio"
           value="gif"
           class="accent-violet-400"
-        />
+        >
         <Circle :size="14" class="text-gray-400" />
         <span class="text-xs text-gray-400">GIF</span>
       </label>
@@ -158,7 +179,7 @@ function execute() {
           type="radio"
           value="video"
           class="accent-violet-400"
-        />
+        >
         <Video :size="14" class="text-gray-400" />
         <span class="text-xs text-gray-400">{{ $t('timed.video') }}</span>
       </label>

@@ -1,92 +1,94 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { Film, Settings as SettingsIcon, RefreshCw } from 'lucide-vue-next';
-import type { Settings, VideoInfo } from '@/utils/types';
-import { DEFAULT_SETTINGS } from '@/utils/constants';
-import { settingsStorage } from '@/utils/storage';
-import { getActiveTab, sendToContent } from '@/utils/messaging';
-import { resolveLocale, setLocale } from '@/utils/i18n';
-import StatusBar from './components/StatusBar.vue';
-import ActionGrid from './components/ActionGrid.vue';
-import TimedActionPanel from './components/TimedActionPanel.vue';
-import SettingsModal from './components/SettingsModal.vue';
-import HelpModal from './components/HelpModal.vue';
+import type { Settings, VideoInfo } from '@/utils/types'
+import { Film, RefreshCw, Settings as SettingsIcon } from 'lucide-vue-next'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { DEFAULT_SETTINGS } from '@/utils/constants'
+import { resolveLocale, setLocale } from '@/utils/i18n'
+import { getActiveTab, sendToContent } from '@/utils/messaging'
+import { settingsStorage } from '@/utils/storage'
+import ActionGrid from './components/ActionGrid.vue'
+import HelpModal from './components/HelpModal.vue'
+import SettingsModal from './components/SettingsModal.vue'
+import StatusBar from './components/StatusBar.vue'
+import TimedActionPanel from './components/TimedActionPanel.vue'
 
-declare const __APP_VERSION__: string;
+declare const __APP_VERSION__: string
 
-const { t } = useI18n();
-const version = __APP_VERSION__;
-const settings = ref<Settings>({ ...DEFAULT_SETTINGS });
-const videoInfo = ref<VideoInfo>({ hasVideo: false });
-const statusKey = ref<{ key: string; params?: Record<string, unknown> }>({ key: 'status.waiting' });
-const statusText = computed(() => t(statusKey.value.key, statusKey.value.params ?? {}));
-const showSettings = ref(false);
-const showHelp = ref(false);
-const checking = ref(false);
+const { t } = useI18n()
+const version = __APP_VERSION__
+const settings = ref<Settings>({ ...DEFAULT_SETTINGS })
+const videoInfo = ref<VideoInfo>({ hasVideo: false })
+const statusKey = ref<{ key: string, params?: Record<string, unknown> }>({ key: 'status.waiting' })
+const statusText = computed(() => t(statusKey.value.key, statusKey.value.params ?? {}))
+const showSettings = ref(false)
+const showHelp = ref(false)
+const checking = ref(false)
 
-let pollTimer: ReturnType<typeof setInterval> | undefined;
+let pollTimer: ReturnType<typeof setInterval> | undefined
 
 watch(() => settings.value.locale, (loc) => {
-  setLocale(resolveLocale(loc));
-}, { immediate: false });
+  setLocale(resolveLocale(loc))
+}, { immediate: false })
 
 onMounted(async () => {
-  const s = await settingsStorage.getValue();
-  if (s) settings.value = s;
-  setLocale(resolveLocale(settings.value.locale));
-  await checkVideo();
+  const s = await settingsStorage.getValue()
+  if (s)
+    settings.value = s
+  setLocale(resolveLocale(settings.value.locale))
+  await checkVideo()
 
   if (!videoInfo.value.hasVideo) {
     pollTimer = setInterval(async () => {
-      await checkVideo();
+      await checkVideo()
       if (videoInfo.value.hasVideo && pollTimer) {
-        clearInterval(pollTimer);
-        pollTimer = undefined;
+        clearInterval(pollTimer)
+        pollTimer = undefined
       }
-    }, 2000);
+    }, 2000)
   }
-});
+})
 
 onUnmounted(() => {
   if (pollTimer) {
-    clearInterval(pollTimer);
-    pollTimer = undefined;
+    clearInterval(pollTimer)
+    pollTimer = undefined
   }
-});
+})
 
 async function checkVideo() {
-  checking.value = true;
-  const tab = await getActiveTab();
+  checking.value = true
+  const tab = await getActiveTab()
   if (!tab?.id) {
-    statusKey.value = { key: 'status.noConnection' };
-    checking.value = false;
-    return;
+    statusKey.value = { key: 'status.noConnection' }
+    checking.value = false
+    return
   }
   try {
-    const res = (await sendToContent(tab.id, { action: 'checkVideo' })) as VideoInfo;
-    videoInfo.value = res;
+    const res = (await sendToContent(tab.id, { action: 'checkVideo' })) as VideoInfo
+    videoInfo.value = res
     statusKey.value = res.hasVideo
       ? { key: 'status.detected', params: { w: res.videoWidth, h: res.videoHeight } }
-      : { key: 'status.notDetected' };
-  } catch {
-    statusKey.value = { key: 'status.noConnection' };
+      : { key: 'status.notDetected' }
   }
-  checking.value = false;
+  catch {
+    statusKey.value = { key: 'status.noConnection' }
+  }
+  checking.value = false
 }
 
 async function sendTimedAction(payload: {
-  type: string;
-  action: string;
-  time?: number;
-  times?: number[];
-  start?: number;
-  end?: number;
+  type: string
+  action: string
+  time?: number
+  times?: number[]
+  start?: number
+  end?: number
 }) {
-  const tab = await getActiveTab();
+  const tab = await getActiveTab()
   if (!tab?.id) {
-    statusKey.value = { key: 'status.openVideoPage' };
-    return;
+    statusKey.value = { key: 'status.openVideoPage' }
+    return
   }
   try {
     if (payload.type === 'point') {
@@ -94,67 +96,73 @@ async function sendTimedAction(payload: {
         action: 'timedScreenshot',
         time: payload.time,
         settings: settings.value,
-      });
-      statusKey.value = { key: 'command.seekingScreenshot' };
-    } else if (payload.type === 'range' && payload.action === 'gif') {
+      })
+      statusKey.value = { key: 'command.seekingScreenshot' }
+    }
+    else if (payload.type === 'range' && payload.action === 'gif') {
       await sendToContent(tab.id, {
         action: 'timedGif',
         start: payload.start,
         end: payload.end,
         settings: settings.value,
-      });
-      statusKey.value = { key: 'command.timedGif' };
-    } else if (payload.type === 'range' && payload.action === 'video') {
+      })
+      statusKey.value = { key: 'command.timedGif' }
+    }
+    else if (payload.type === 'range' && payload.action === 'video') {
       await sendToContent(tab.id, {
         action: 'timedVideo',
         start: payload.start,
         end: payload.end,
         settings: settings.value,
-      });
-      statusKey.value = { key: 'command.timedVideo' };
-    } else if (payload.type === 'range' && payload.action === 'screenshot') {
+      })
+      statusKey.value = { key: 'command.timedVideo' }
+    }
+    else if (payload.type === 'range' && payload.action === 'screenshot') {
       await sendToContent(tab.id, {
         action: 'timedScreenshotPoints',
         times: [payload.start, payload.end],
         settings: settings.value,
-      });
-      statusKey.value = { key: 'command.timedRangeScreenshot' };
-    } else if (payload.type === 'points') {
+      })
+      statusKey.value = { key: 'command.timedRangeScreenshot' }
+    }
+    else if (payload.type === 'points') {
       await sendToContent(tab.id, {
         action: 'timedScreenshotPoints',
         times: payload.times,
         settings: settings.value,
-      });
-      statusKey.value = { key: 'command.timedPoints', params: { n: payload.times?.length } };
+      })
+      statusKey.value = { key: 'command.timedPoints', params: { n: payload.times?.length } }
     }
-  } catch {
-    statusKey.value = { key: 'status.openVideoPage' };
+  }
+  catch {
+    statusKey.value = { key: 'status.openVideoPage' }
   }
 }
 
 async function sendCommand(action: string) {
-  const tab = await getActiveTab();
+  const tab = await getActiveTab()
   if (!tab?.id) {
-    statusKey.value = { key: 'status.openVideoPage' };
-    return;
+    statusKey.value = { key: 'status.openVideoPage' }
+    return
   }
   try {
-    await sendToContent(tab.id, { action, settings: settings.value });
+    await sendToContent(tab.id, { action, settings: settings.value })
     const keyMap: Record<string, string> = {
       screenshot: 'command.screenshotting',
       gif: 'command.startGif',
       video: 'command.startVideo',
       burst: 'command.startBurst',
-    };
-    statusKey.value = { key: keyMap[action] ?? 'command.executing' };
-  } catch {
-    statusKey.value = { key: 'status.openVideoPage' };
+    }
+    statusKey.value = { key: keyMap[action] ?? 'command.executing' }
+  }
+  catch {
+    statusKey.value = { key: 'status.openVideoPage' }
   }
 }
 
 async function updateSettings(patch: Partial<Settings>) {
-  Object.assign(settings.value, patch);
-  await settingsStorage.setValue({ ...settings.value });
+  Object.assign(settings.value, patch)
+  await settingsStorage.setValue({ ...settings.value })
 }
 </script>
 

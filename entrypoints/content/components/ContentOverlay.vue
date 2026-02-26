@@ -1,45 +1,45 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref } from 'vue'
 
-const toast = ref<{ text: string; type: string } | null>(null);
-const preview = ref<{ url: string; filename: string; isBlob: boolean } | null>(null);
-const recording = ref<{ progress: number; elapsed: number; total: number } | null>(null);
-const flash = ref(false);
-const globalURL = globalThis.URL;
+const emit = defineEmits<{
+  save: [url: string, filename: string]
+  stopRecording: []
+}>()
+const toast = ref<{ text: string, type: string } | null>(null)
+const preview = ref<{ url: string, filename: string, isBlob: boolean } | null>(null)
+const recording = ref<{ progress: number, elapsed: number, total: number } | null>(null)
+const flash = ref(false)
+const globalURL = globalThis.URL
 
-let toastTimer: ReturnType<typeof setTimeout> | undefined;
-let previewTimer: ReturnType<typeof setTimeout> | undefined;
+let toastTimer: ReturnType<typeof setTimeout> | undefined
+let previewTimer: ReturnType<typeof setTimeout> | undefined
 
 function showToast(text: string, type: string) {
-  clearTimeout(toastTimer);
-  toast.value = { text, type };
-  toastTimer = setTimeout(() => (toast.value = null), 3500);
+  clearTimeout(toastTimer)
+  toast.value = { text, type }
+  toastTimer = setTimeout(() => (toast.value = null), 3500)
 }
 
 function showPreview(url: string, filename: string, isBlob = false) {
-  clearTimeout(previewTimer);
-  preview.value = { url, filename, isBlob };
+  clearTimeout(previewTimer)
+  preview.value = { url, filename, isBlob }
   previewTimer = setTimeout(() => {
-    if (preview.value?.isBlob) globalURL.revokeObjectURL(preview.value.url);
-    preview.value = null;
-  }, 15000);
+    if (preview.value?.isBlob)
+      globalURL.revokeObjectURL(preview.value.url)
+    preview.value = null
+  }, 15000)
 }
 
 function showRecording(show: boolean, progress = 0, elapsed = 0, total = 0) {
-  recording.value = show ? { progress, elapsed, total } : null;
+  recording.value = show ? { progress, elapsed, total } : null
 }
 
 function showFlash() {
-  flash.value = true;
-  setTimeout(() => (flash.value = false), 300);
+  flash.value = true
+  setTimeout(() => (flash.value = false), 300)
 }
 
-const emit = defineEmits<{
-  save: [url: string, filename: string];
-  stopRecording: [];
-}>();
-
-defineExpose({ showToast, showPreview, showRecording, showFlash });
+defineExpose({ showToast, showPreview, showRecording, showFlash })
 </script>
 
 <template>
@@ -47,7 +47,7 @@ defineExpose({ showToast, showPreview, showRecording, showFlash });
   <div v-if="flash" class="mc-flash" />
 
   <!-- Toast -->
-  <div v-if="toast" :class="['mc-toast', `mc-toast--${toast.type}`]">
+  <div v-if="toast" class="mc-toast" :class="[`mc-toast--${toast.type}`]">
     <span class="mc-toast__icon">
       <template v-if="toast.type === 'success'">✅</template>
       <template v-else-if="toast.type === 'error'">❌</template>
@@ -74,7 +74,7 @@ defineExpose({ showToast, showPreview, showRecording, showFlash });
 
   <!-- Preview -->
   <div v-if="preview" class="mc-preview">
-    <img :src="preview.url" alt="preview" class="mc-preview__img" />
+    <img :src="preview.url" alt="preview" class="mc-preview__img">
     <div class="mc-preview__actions">
       <button
         class="mc-preview__btn mc-preview__btn--save"
@@ -90,5 +90,4 @@ defineExpose({ showToast, showPreview, showRecording, showFlash });
       </button>
     </div>
   </div>
-
 </template>
