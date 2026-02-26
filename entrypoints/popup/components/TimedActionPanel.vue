@@ -62,6 +62,7 @@ const description = computed(() => {
 });
 
 const canExecute = computed(() => {
+  if (!props.videoInfo.hasVideo) return false;
   if (!parsed.value || validationError.value) return false;
   const a = action.value;
   if (parsed.value.type === 'point' && a !== 'screenshot') return false;
@@ -93,8 +94,14 @@ function execute() {
       输入时间点或时间段，对视频指定位置截图/录制
     </p>
 
+    <!-- No video hint -->
+    <div v-if="!videoInfo.hasVideo" class="text-xs text-gray-600 mb-2.5 flex items-center gap-1">
+      <AlertCircle :size="12" class="text-gray-600" />
+      等待检测到视频后可使用
+    </div>
+
     <!-- Video time info -->
-    <div v-if="videoInfo.hasVideo && videoInfo.duration" class="flex gap-3 text-xs text-gray-500 mb-2.5">
+    <div v-else-if="videoInfo.duration" class="flex gap-3 text-xs text-gray-500 mb-2.5">
       <span>时长: {{ formatTime(videoInfo.duration) }}</span>
       <span v-if="videoInfo.currentTime !== undefined">当前: {{ formatTime(videoInfo.currentTime) }}</span>
     </div>
@@ -105,7 +112,8 @@ function execute() {
         v-model="timeInput"
         type="text"
         placeholder="如: 1:05  或  1:00-1:10  或  0:30,1:00,1:30"
-        class="flex-1 px-2.5 py-2 bg-[#0f0f1a] border border-[#2a2a4a] rounded-lg text-gray-200 text-[13px] outline-none focus:border-violet-400 transition-colors"
+        :disabled="!videoInfo.hasVideo"
+        class="flex-1 px-2.5 py-2 bg-[#0f0f1a] border border-[#2a2a4a] rounded-lg text-gray-200 text-[13px] outline-none focus:border-violet-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         @keydown.enter="execute"
       />
     </div>

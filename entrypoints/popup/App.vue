@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { Film, Settings as SettingsIcon } from 'lucide-vue-next';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { Film, Settings as SettingsIcon, RefreshCw } from 'lucide-vue-next';
 import type { Settings, VideoInfo } from '@/utils/types';
 import { DEFAULT_SETTINGS } from '@/utils/constants';
 import { settingsStorage } from '@/utils/storage';
@@ -11,22 +11,47 @@ import TimedActionPanel from './components/TimedActionPanel.vue';
 import SettingsModal from './components/SettingsModal.vue';
 import HelpModal from './components/HelpModal.vue';
 
+declare const __APP_VERSION__: string;
+
+const version = __APP_VERSION__;
 const settings = ref<Settings>({ ...DEFAULT_SETTINGS });
 const videoInfo = ref<VideoInfo>({ hasVideo: false });
 const statusText = ref('等待检测视频...');
 const showSettings = ref(false);
 const showHelp = ref(false);
+const checking = ref(false);
+
+let pollTimer: ReturnType<typeof setInterval> | undefined;
 
 onMounted(async () => {
   const s = await settingsStorage.getValue();
   if (s) settings.value = s;
   await checkVideo();
+
+  if (!videoInfo.value.hasVideo) {
+    pollTimer = setInterval(async () => {
+      await checkVideo();
+      if (videoInfo.value.hasVideo && pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = undefined;
+      }
+    }, 2000);
+  }
+});
+
+onUnmounted(() => {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = undefined;
+  }
 });
 
 async function checkVideo() {
+  checking.value = true;
   const tab = await getActiveTab();
   if (!tab?.id) {
     statusText.value = '无法连接到页面';
+    checking.value = false;
     return;
   }
   try {
@@ -38,6 +63,7 @@ async function checkVideo() {
   } catch {
     statusText.value = '无法连接到页面';
   }
+  checking.value = false;
 }
 
 async function sendTimedAction(payload: {
@@ -144,11 +170,21 @@ async function updateSettings(patch: Partial<Settings>) {
         >
           <SettingsIcon :size="18" />
         </button>
-        <span class="text-[11px] text-gray-600 bg-[#1a1a2e] px-2 py-0.5 rounded-xl">v2.0</span>
+        <span class="text-[11px] text-gray-600 bg-[#1a1a2e] px-2 py-0.5 rounded-xl">v{{ version }}</span>
       </div>
     </header>
 
-    <StatusBar :text="statusText" :active="videoInfo.hasVideo" />
+    <div class="flex items-center gap-2 mb-4">
+      <StatusBar :text="statusText" :active="videoInfo.hasVideo" class="flex-1" />
+      <button
+        class="shrink-0 p-2 bg-[#1a1a2e] border border-[#2a2a4a] rounded-xl text-gray-500 cursor-pointer hover:text-violet-400 hover:border-violet-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        title="重新检测视频"
+        :disabled="checking"
+        @click="checkVideo"
+      >
+        <RefreshCw :size="14" :class="{ 'animate-spin': checking }" />
+      </button>
+    </div>
 
     <section class="mb-4">
       <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
@@ -163,7 +199,6 @@ async function updateSettings(patch: Partial<Settings>) {
     </section>
 
     <TimedActionPanel
-      v-if="videoInfo.hasVideo"
       :video-info="videoInfo"
       @execute="sendTimedAction"
     />
