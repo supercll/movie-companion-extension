@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head><title>Generate Icons</title></head>
+<body>
+<canvas id="c"></canvas>
+<script>
+function generateIcon(size) {
+  const canvas = document.getElementById('c');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const grad = ctx.createLinearGradient(0, 0, size, size);
+  grad.addColorStop(0, '#6d28d9');
+  grad.addColorStop(1, '#3b82f6');
+  const r = size * 0.15;
+  ctx.beginPath();
+  ctx.moveTo(r, 0);
+  ctx.lineTo(size - r, 0);
+  ctx.quadraticCurveTo(size, 0, size, r);
+  ctx.lineTo(size, size - r);
+  ctx.quadraticCurveTo(size, size, size - r, size);
+  ctx.lineTo(r, size);
+  ctx.quadraticCurveTo(0, size, 0, size - r);
+  ctx.lineTo(0, r);
+  ctx.quadraticCurveTo(0, 0, r, 0);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Film strip lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+  ctx.lineWidth = size * 0.02;
+  const p = size * 0.2;
+  ctx.strokeRect(p, p, size - 2*p, size - 2*p);
+
+  // Play triangle
+  ctx.fillStyle = 'rgba(255,255,255,0.95)';
+  ctx.beginPath();
+  const cx = size * 0.45;
+  const cy = size * 0.5;
+  const s = size * 0.22;
+  ctx.moveTo(cx, cy - s * 0.6);
+  ctx.lineTo(cx + s, cy);
+  ctx.lineTo(cx, cy + s * 0.6);
+  ctx.closePath();
+  ctx.fill();
+
+  // Camera lens circle
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = size * 0.03;
+  ctx.beginPath();
+  ctx.arc(size * 0.5, size * 0.5, size * 0.28, 0, Math.PI * 2);
+  ctx.stroke();
+
+  return canvas.toDataURL('image/png');
+}
+
+[16, 48, 128].forEach(size => {
+  const dataUrl = generateIcon(size);
+  const link = document.createElement('a');
+  link.href = dataUrl;
+  link.download = `icon${size}.png`;
+  link.textContent = `Download icon${size}.png`;
+  link.style.display = 'block';
+  link.style.margin = '10px';
+  document.body.appendChild(link);
+
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.style.margin = '10px';
+  document.body.appendChild(img);
+});
+</script>
+<p style="margin:20px;color:#666;">Click links above to download icons, then place them in the icons/ folder.</p>
+</body>
+</html>

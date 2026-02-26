@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>观影伴侣</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/>
+          <line x1="7" y1="2" x2="7" y2="22"/>
+          <line x1="17" y1="2" x2="17" y2="22"/>
+          <line x1="2" y1="12" x2="22" y2="12"/>
+          <line x1="2" y1="7" x2="7" y2="7"/>
+          <line x1="2" y1="17" x2="7" y2="17"/>
+          <line x1="17" y1="17" x2="22" y2="17"/>
+          <line x1="17" y1="7" x2="22" y2="7"/>
+        </svg>
+        <h1>观影伴侣</h1>
+      </div>
+      <span class="version">v1.0</span>
+    </header>
+
+    <section class="status-bar" id="statusBar">
+      <span class="status-dot"></span>
+      <span class="status-text">等待检测视频...</span>
+    </section>
+
+    <section class="actions">
+      <h2>快捷操作</h2>
+      <div class="action-grid">
+        <button class="action-btn" id="btnScreenshot" title="截取当前视频画面">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+            <circle cx="12" cy="13" r="4"/>
+          </svg>
+          <span>截图</span>
+        </button>
+        <button class="action-btn" id="btnGif" title="录制视频GIF动图">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <circle cx="12" cy="12" r="3" fill="currentColor"/>
+          </svg>
+          <span>录制GIF</span>
+        </button>
+        <button class="action-btn" id="btnBurst" title="连续截取多张图片">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="6" width="16" height="14" rx="2"/>
+            <rect x="6" y="2" width="16" height="14" rx="2"/>
+          </svg>
+          <span>连拍</span>
+        </button>
+        <button class="action-btn" id="btnPreset" title="管理预设指令">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>预设</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="presets-panel" id="presetsPanel" style="display:none;">
+      <h2>预设指令管理</h2>
+      <p class="hint">在视频页面的输入框中输入指令即可触发对应操作</p>
+      <div class="preset-list" id="presetList"></div>
+      <div class="preset-add">
+        <input type="text" id="newPresetTrigger" placeholder="触发词，如：截图" />
+        <select id="newPresetAction">
+          <option value="screenshot">截图</option>
+          <option value="gif">录制GIF</option>
+          <option value="burst">连拍(5张)</option>
+        </select>
+        <button id="btnAddPreset" class="btn-add">+</button>
+      </div>
+    </section>
+
+    <section class="settings">
+      <h2>GIF设置</h2>
+      <div class="setting-row">
+        <label>录制时长</label>
+        <div class="setting-control">
+          <input type="range" id="gifDuration" min="1" max="10" value="3" />
+          <span id="gifDurationVal">3秒</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label>帧率(FPS)</label>
+        <div class="setting-control">
+          <input type="range" id="gifFps" min="5" max="30" value="10" />
+          <span id="gifFpsVal">10</span>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label>画质</label>
+        <div class="setting-control">
+          <select id="gifQuality">
+            <option value="10">高</option>
+            <option value="15" selected>中</option>
+            <option value="20">低</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="settings">
+      <h2>截图设置</h2>
+      <div class="setting-row">
+        <label>图片格式</label>
+        <div class="setting-control">
+          <select id="imageFormat">
+            <option value="png" selected>PNG</option>
+            <option value="jpeg">JPEG</option>
+            <option value="webp">WebP</option>
+          </select>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label>JPEG质量</label>
+        <div class="setting-control">
+          <input type="range" id="jpegQuality" min="50" max="100" value="92" />
+          <span id="jpegQualityVal">92%</span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <a href="#" id="btnHelp">使用帮助</a>
+      <span class="divider">|</span>
+      <a href="#" id="btnShortcuts">快捷键</a>
+    </footer>
+  </div>
+
+  <div class="modal" id="helpModal" style="display:none;">
+    <div class="modal-content">
+      <h3>使用帮助</h3>
+      <div class="help-content">
+        <p><strong>基本用法：</strong></p>
+        <ul>
+          <li>打开包含视频的网页（YouTube、B站等）</li>
+          <li>点击插件图标，使用快捷操作按钮</li>
+          <li>或设置预设指令，在页面输入框中输入触发词</li>
+        </ul>
+        <p><strong>快捷键：</strong></p>
+        <ul>
+          <li><kbd>Alt+S</kbd> — 截图</li>
+          <li><kbd>Alt+G</kbd> — 录制GIF</li>
+          <li><kbd>Alt+B</kbd> — 连拍</li>
+        </ul>
+        <p><strong>支持的网站：</strong></p>
+        <ul>
+          <li>YouTube、Bilibili、Netflix、爱奇艺等</li>
+          <li>任何包含 &lt;video&gt; 标签的网页</li>
+        </ul>
+      </div>
+      <button class="btn-close" id="btnCloseHelp">关闭</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
