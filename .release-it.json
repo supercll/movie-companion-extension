@@ -10,6 +10,7 @@
   "github": {
     "release": true,
     "releaseName": "v${version}",
+    "host": "github.com",
     "assets": [
       ".output/*.zip"
     ]
