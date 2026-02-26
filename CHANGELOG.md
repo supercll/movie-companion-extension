@@ -1,26 +1,26 @@
 # Changelog
 
-## [2.2.1](https://github-lc/supercll/movie-companion-extension/compare/v2.2.0...v2.2.1) (2026-02-26)
+## [2.2.1](https://github.com/supercll/movie-companion-extension/compare/v2.2.0...v2.2.1) (2026-02-26)
 
 ### ✨ Features
 
-* add stop recording functionality for GIF and video recordings ([8a2374a](https://github-lc/supercll/movie-companion-extension/commit/8a2374a41fbed115e0d877f5f8a0c86587ddd555))
+* add stop recording functionality for GIF and video recordings ([8a2374a](https://github.com/supercll/movie-companion-extension/commit/8a2374a41fbed115e0d877f5f8a0c86587ddd555))
 
 ### 🏠 Chores
 
-* update release-it configuration to ignore recommended bumps ([a137997](https://github-lc/supercll/movie-companion-extension/commit/a137997e31e4e1c0143c404f6f94975febe68166))
+* update release-it configuration to ignore recommended bumps ([a137997](https://github.com/supercll/movie-companion-extension/commit/a137997e31e4e1c0143c404f6f94975febe68166))
 
-## [2.2.0](https://github-lc/supercll/movie-companion-extension/compare/v2.1.1...v2.2.0) (2026-02-26)
+## [2.2.0](https://github.com/supercll/movie-companion-extension/compare/v2.1.1...v2.2.0) (2026-02-26)
 
 ### ✨ Features
 
-* enhance video detection and UI components ([8443bd9](https://github-lc/supercll/movie-companion-extension/commit/8443bd9bd73a21b173a31d76fc73b4d70bb915d3))
+* enhance video detection and UI components ([8443bd9](https://github.com/supercll/movie-companion-extension/commit/8443bd9bd73a21b173a31d76fc73b4d70bb915d3))
 
-## [2.1.1](https://github-lc/supercll/movie-companion-extension/compare/v2.1.0...v2.1.1) (2026-02-26)
+## [2.1.1](https://github.com/supercll/movie-companion-extension/compare/v2.1.0...v2.1.1) (2026-02-26)
 
 ### 🏠 Chores
 
-* update release-it configuration and changelog links to use GitHub domain ([3dd83f0](https://github-lc/supercll/movie-companion-extension/commit/3dd83f0c0f1dbaa369e81a5887331ace7a06f211))
+* update release-it configuration and changelog links to use GitHub domain ([3dd83f0](https://github.com/supercll/movie-companion-extension/commit/3dd83f0c0f1dbaa369e81a5887331ace7a06f211))
 
 ## [2.1.0](https://github.com/supercll/movie-companion-extension/compare/v2.0.2...v2.1.0) (2026-02-26)
 

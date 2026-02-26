@@ -33,7 +33,12 @@
         ]
       },
       "infile": "CHANGELOG.md",
-      "header": "# Changelog"
+      "header": "# Changelog",
+      "context": {
+        "host": "https://github.com",
+        "owner": "supercll",
+        "repository": "movie-companion-extension"
+      }
     }
   },
   "hooks": {
