@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.2.2](https://github.com/supercll/movie-companion-extension/compare/v2.2.1...v2.2.2) (2026-02-26)
+
+### ✨ Features
+
+* add internationalization support ([4e0bef3](https://github.com/supercll/movie-companion-extension/commit/4e0bef36f0dd95f0f3a975824f52e57096351b28))
+
+### 🏠 Chores
+
+* update release-it configuration to include repository context and fix changelog links to use GitHub domain ([1666237](https://github.com/supercll/movie-companion-extension/commit/1666237edac7008ed5231d26564e4d67fa904c1c))
+
 ## [2.2.1](https://github.com/supercll/movie-companion-extension/compare/v2.2.0...v2.2.1) (2026-02-26)
 
 ### ✨ Features
