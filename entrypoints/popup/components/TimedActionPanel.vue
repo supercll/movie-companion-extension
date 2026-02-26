@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
-import { Clock, Camera, Circle, AlertCircle } from 'lucide-vue-next';
+import { Clock, Camera, Circle, Video, AlertCircle } from 'lucide-vue-next';
 import { parseTimedInput, formatTime } from '@/utils/time-parser';
 import type { TimedActionType, VideoInfo } from '@/utils/types';
 
@@ -42,27 +42,30 @@ const validationError = computed(() => {
 
 const description = computed(() => {
   if (!parsed.value) return '';
+  const a = action.value;
   if (parsed.value.type === 'point') {
-    return action.value === 'screenshot'
-      ? `在 ${formatTime(parsed.value.time)} 处截图`
-      : `无法对单个时间点录制GIF，请输入时间段`;
+    if (a === 'screenshot') return `在 ${formatTime(parsed.value.time)} 处截图`;
+    return `无法对单个时间点录制，请输入时间段`;
   }
   if (parsed.value.type === 'range') {
     const dur = parsed.value.end - parsed.value.start;
-    return action.value === 'screenshot'
-      ? `在 ${formatTime(parsed.value.start)} - ${formatTime(parsed.value.end)} 范围内截图`
-      : `录制 ${formatTime(parsed.value.start)} - ${formatTime(parsed.value.end)} 的GIF (${dur.toFixed(1)}秒)`;
+    const rangeLabel = `${formatTime(parsed.value.start)} - ${formatTime(parsed.value.end)}`;
+    if (a === 'screenshot') return `在 ${rangeLabel} 范围内截图`;
+    if (a === 'gif') return `录制 ${rangeLabel} 的GIF (${dur.toFixed(1)}秒)`;
+    return `录制 ${rangeLabel} 的视频 (${dur.toFixed(1)}秒，含声音)`;
   }
   if (parsed.value.type === 'points') {
-    return `在 ${parsed.value.times.length} 个时间点分别截图`;
+    if (a === 'screenshot') return `在 ${parsed.value.times.length} 个时间点分别截图`;
+    return `无法对多个时间点录制，请输入时间段`;
   }
   return '';
 });
 
 const canExecute = computed(() => {
   if (!parsed.value || validationError.value) return false;
-  if (parsed.value.type === 'point' && action.value === 'gif') return false;
-  if (parsed.value.type === 'points' && action.value === 'gif') return false;
+  const a = action.value;
+  if (parsed.value.type === 'point' && a !== 'screenshot') return false;
+  if (parsed.value.type === 'points' && a !== 'screenshot') return false;
   return true;
 });
 
@@ -128,7 +131,18 @@ function execute() {
           class="accent-violet-400"
         />
         <Circle :size="14" class="text-gray-400" />
-        <span class="text-xs text-gray-400">录制GIF</span>
+        <span class="text-xs text-gray-400">GIF</span>
+      </label>
+
+      <label class="flex items-center gap-1 cursor-pointer ml-3">
+        <input
+          v-model="action"
+          type="radio"
+          value="video"
+          class="accent-violet-400"
+        />
+        <Video :size="14" class="text-gray-400" />
+        <span class="text-xs text-gray-400">视频</span>
       </label>
 
       <button

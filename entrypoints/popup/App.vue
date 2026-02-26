@@ -73,6 +73,14 @@ async function sendTimedAction(payload: {
         settings: settings.value,
       });
       statusText.value = '正在录制指定时间段GIF...';
+    } else if (payload.type === 'range' && payload.action === 'video') {
+      await sendToContent(tab.id, {
+        action: 'timedVideo',
+        start: payload.start,
+        end: payload.end,
+        settings: settings.value,
+      });
+      statusText.value = '正在录制指定时间段视频...';
     } else if (payload.type === 'range' && payload.action === 'screenshot') {
       await sendToContent(tab.id, {
         action: 'timedScreenshotPoints',
@@ -104,6 +112,7 @@ async function sendCommand(action: string) {
     const labels: Record<string, string> = {
       screenshot: '正在截图...',
       gif: '开始录制GIF...',
+      video: '开始录制视频...',
       burst: '开始连拍...',
     };
     statusText.value = labels[action] ?? '执行中...';
@@ -147,6 +156,7 @@ async function updatePresets(newPresets: Preset[]) {
       <ActionGrid
         @screenshot="sendCommand('screenshot')"
         @gif="sendCommand('gif')"
+        @video="sendCommand('video')"
         @burst="sendCommand('burst')"
         @preset="showPresets = !showPresets"
       />

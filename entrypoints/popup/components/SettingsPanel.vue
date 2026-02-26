@@ -61,6 +61,60 @@ const emit = defineEmits<{
     </div>
   </section>
 
+  <!-- Video Recording Settings -->
+  <section class="bg-[#1a1a2e] rounded-xl p-3.5 mb-3">
+    <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">视频录制设置</h2>
+
+    <div class="flex items-center justify-between py-1.5">
+      <label class="text-[13px] text-gray-400">录制时长</label>
+      <div class="flex items-center gap-2">
+        <input
+          type="range"
+          :min="5"
+          :max="60"
+          :step="5"
+          :value="settings.videoDuration"
+          class="w-24 accent-violet-400"
+          @input="emit('update', { videoDuration: +($event.target as HTMLInputElement).value })"
+        />
+        <span class="text-xs text-violet-400 min-w-[30px] text-right">{{ settings.videoDuration }}秒</span>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between py-1.5">
+      <label class="text-[13px] text-gray-400">视频格式</label>
+      <div class="flex items-center gap-2">
+        <select
+          :value="settings.videoFormat"
+          class="px-2 py-1 bg-[#0f0f1a] border border-[#2a2a4a] rounded-md text-gray-200 text-xs outline-none"
+          @change="emit('update', { videoFormat: ($event.target as HTMLSelectElement).value as Settings['videoFormat'] })"
+        >
+          <option value="auto">自动(最佳)</option>
+          <option value="mp4">MP4 (H264)</option>
+          <option value="webm-vp9">WebM (VP9)</option>
+          <option value="webm-h264">WebM (H264)</option>
+          <option value="webm">WebM</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-between py-1.5">
+      <label class="text-[13px] text-gray-400">码率</label>
+      <div class="flex items-center gap-2">
+        <input
+          type="range"
+          :min="500"
+          :max="8000"
+          :step="500"
+          :value="settings.videoBitrate"
+          class="w-24 accent-violet-400"
+          @input="emit('update', { videoBitrate: +($event.target as HTMLInputElement).value })"
+        />
+        <span class="text-xs text-violet-400 min-w-[42px] text-right">{{ (settings.videoBitrate / 1000).toFixed(1) }}M</span>
+      </div>
+    </div>
+  </section>
+
   <!-- Screenshot Settings -->
   <section class="bg-[#1a1a2e] rounded-xl p-3.5 mb-3">
     <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">截图设置</h2>

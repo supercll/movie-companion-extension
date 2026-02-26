@@ -1,6 +1,6 @@
-export type ActionType = 'screenshot' | 'gif' | 'burst';
+export type ActionType = 'screenshot' | 'gif' | 'burst' | 'video';
 
-export type TimedActionType = 'screenshot' | 'gif';
+export type TimedActionType = 'screenshot' | 'gif' | 'video';
 
 export interface Preset {
   trigger: string;
@@ -13,6 +13,9 @@ export interface Settings {
   gifQuality: number;
   imageFormat: 'png' | 'jpeg' | 'webp';
   jpegQuality: number;
+  videoDuration: number;
+  videoFormat: 'auto' | 'mp4' | 'webm-vp9' | 'webm-h264' | 'webm';
+  videoBitrate: number;
 }
 
 export interface VideoInfo {
@@ -32,7 +35,10 @@ export type MessageAction =
   | { action: 'updateSettings'; settings: Settings }
   | { action: 'timedScreenshot'; time: number; settings: Settings }
   | { action: 'timedScreenshotPoints'; times: number[]; settings: Settings }
-  | { action: 'timedGif'; start: number; end: number; settings: Settings };
+  | { action: 'timedGif'; start: number; end: number; settings: Settings }
+  | { action: 'video'; settings: Settings }
+  | { action: 'stopVideo' }
+  | { action: 'timedVideo'; start: number; end: number; settings: Settings };
 
 export type MessageResponse =
   | { success: true }

@@ -3,6 +3,7 @@ import { createApp, type ComponentPublicInstance } from 'vue';
 import hotkeys from 'hotkeys-js';
 import { findVideo, captureVideoFrame, getTimestamp } from '@/utils/video';
 import { recordGif, isRecording } from '@/utils/gif-recorder';
+import { startVideoRecording, isVideoRecording, stopVideoRecording, getFormatExtension, type VideoFormat } from '@/utils/video-recorder';
 import { screenshotAtTime, screenshotAtPoints, recordGifAtRange } from '@/utils/video-seek';
 import { downloadDataUrl, downloadBlob } from '@/utils/downloader';
 import { presetsStorage, settingsStorage } from '@/utils/storage';
@@ -202,11 +203,46 @@ export default defineContentScript({
       });
     }
 
+    function recordVideo() {
+      const video = findVideo();
+      if (!video) {
+        overlay?.showToast('未找到视频元素', 'error');
+        return;
+      }
+      if (isVideoRecording()) {
+        stopVideoRecording();
+        overlay?.showToast('正在停止录制...', 'info');
+        return;
+      }
+
+      overlay?.showRecording(true, 0, 0, settings.videoDuration);
+      overlay?.showToast(`录制视频中 (${settings.videoDuration}秒)...`, 'recording');
+
+      startVideoRecording(video, settings, {
+        onProgress(elapsed, total) {
+          overlay?.showRecording(true, elapsed / total, elapsed, total);
+        },
+        onComplete(blob, duration) {
+          overlay?.showRecording(false);
+          const fmt = (settings.videoFormat === 'auto' ? 'webm' : settings.videoFormat) as VideoFormat;
+          const ext = getFormatExtension(fmt);
+          const filename = `movie-companion-${getTimestamp()}.${ext}`;
+          downloadBlob(blob, filename);
+          overlay?.showToast(`视频录制完成！(${duration.toFixed(1)}秒)`, 'success');
+        },
+        onError(error) {
+          overlay?.showRecording(false);
+          overlay?.showToast(error, 'error');
+        },
+      });
+    }
+
     function executeAction(action: string) {
       switch (action) {
         case 'screenshot': takeScreenshot(); break;
         case 'gif': startGifRecording(); break;
         case 'burst': burstCapture(); break;
+        case 'video': recordVideo(); break;
       }
     }
 
@@ -226,6 +262,11 @@ export default defineContentScript({
       e.preventDefault();
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
       burstCapture();
+    });
+    hotkeys('alt+v', (e) => {
+      e.preventDefault();
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+      recordVideo();
     });
 
     // --- Input Monitor for Preset Triggers ---
@@ -313,6 +354,57 @@ export default defineContentScript({
           timedGifRecording(message.start as number, message.end as number);
           sendResponse({ success: true });
           break;
+        case 'video':
+          if (message.settings) settings = { ...settings, ...(message.settings as Partial<Settings>) };
+          recordVideo();
+          sendResponse({ success: true });
+          break;
+        case 'stopVideo':
+          stopVideoRecording();
+          sendResponse({ success: true });
+          break;
+        case 'timedVideo': {
+          if (message.settings) settings = { ...settings, ...(message.settings as Partial<Settings>) };
+          const tvideo = findVideo();
+          if (!tvideo) {
+            overlay?.showToast('未找到视频元素', 'error');
+            sendResponse({ success: false, error: '未找到视频' });
+            break;
+          }
+          const tstart = message.start as number;
+          const tend = message.end as number;
+          const tdur = tend - tstart;
+
+          const wasPlaying = !tvideo.paused;
+          tvideo.currentTime = tstart;
+          tvideo.play();
+
+          overlay?.showRecording(true, 0, 0, tdur);
+          overlay?.showToast(`录制视频 ${tstart.toFixed(1)}s - ${tend.toFixed(1)}s...`, 'recording');
+
+          const overrideSettings = { ...settings, videoDuration: tdur };
+          startVideoRecording(tvideo, overrideSettings, {
+            onProgress(elapsed, total) {
+              overlay?.showRecording(true, elapsed / total, elapsed, total);
+            },
+            onComplete(blob, duration) {
+              overlay?.showRecording(false);
+              if (wasPlaying) tvideo.play(); else tvideo.pause();
+              const fmt = (settings.videoFormat === 'auto' ? 'webm' : settings.videoFormat) as VideoFormat;
+              const ext = getFormatExtension(fmt);
+              const filename = `movie-companion-${getTimestamp()}.${ext}`;
+              downloadBlob(blob, filename);
+              overlay?.showToast(`视频录制完成！(${duration.toFixed(1)}秒)`, 'success');
+            },
+            onError(error) {
+              overlay?.showRecording(false);
+              if (wasPlaying) tvideo.play(); else tvideo.pause();
+              overlay?.showToast(error, 'error');
+            },
+          });
+          sendResponse({ success: true });
+          break;
+        }
         case 'checkVideo': {
           const video = findVideo();
           sendResponse(

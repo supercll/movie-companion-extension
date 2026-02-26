@@ -14,10 +14,14 @@ export const DEFAULT_SETTINGS: Settings = {
   gifQuality: 15,
   imageFormat: 'png',
   jpegQuality: 92,
+  videoDuration: 10,
+  videoFormat: 'auto',
+  videoBitrate: 2500,
 };
 
 export const ACTION_LABELS: Record<string, string> = {
   screenshot: '截图',
   gif: '录制GIF',
   burst: '连拍(5张)',
+  video: '录制视频',
 };
