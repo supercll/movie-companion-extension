@@ -3,6 +3,7 @@ import { createApp, type ComponentPublicInstance } from 'vue';
 import hotkeys from 'hotkeys-js';
 import { findVideo, captureVideoFrame, getTimestamp } from '@/utils/video';
 import { recordGif, isRecording } from '@/utils/gif-recorder';
+import { screenshotAtTime, screenshotAtPoints, recordGifAtRange } from '@/utils/video-seek';
 import { downloadDataUrl, downloadBlob } from '@/utils/downloader';
 import { presetsStorage, settingsStorage } from '@/utils/storage';
 import type { Settings, Preset } from '@/utils/types';
@@ -131,6 +132,76 @@ export default defineContentScript({
       });
     }
 
+    async function timedScreenshot(time: number) {
+      const video = findVideo();
+      if (!video) {
+        overlay?.showToast('未找到视频元素', 'error');
+        return;
+      }
+      overlay?.showToast(`正在跳转到指定时间截图...`, 'info');
+      try {
+        const { dataUrl, filename } = await screenshotAtTime(video, time, settings);
+        overlay?.showFlash();
+        overlay?.showPreview(dataUrl, filename);
+        overlay?.showToast('定时截图成功！', 'success');
+      } catch (err) {
+        overlay?.showToast(err instanceof Error ? err.message : '定时截图失败', 'error');
+      }
+    }
+
+    async function timedScreenshotPoints(times: number[]) {
+      const video = findVideo();
+      if (!video) {
+        overlay?.showToast('未找到视频元素', 'error');
+        return;
+      }
+      overlay?.showToast(`正在截取 ${times.length} 个时间点...`, 'recording');
+      try {
+        const results = await screenshotAtPoints(video, times, settings, (current, total) => {
+          overlay?.showToast(`截图进度: ${current}/${total}`, 'recording');
+        });
+        for (const { dataUrl, filename } of results) {
+          overlay?.showFlash();
+          downloadDataUrl(dataUrl, filename);
+        }
+        overlay?.showToast(`完成！已保存 ${results.length} 张截图`, 'success');
+      } catch (err) {
+        overlay?.showToast(err instanceof Error ? err.message : '批量截图失败', 'error');
+      }
+    }
+
+    async function timedGifRecording(start: number, end: number) {
+      const video = findVideo();
+      if (!video) {
+        overlay?.showToast('未找到视频元素', 'error');
+        return;
+      }
+      if (isRecording()) {
+        overlay?.showToast('正在录制中...', 'error');
+        return;
+      }
+      const duration = end - start;
+      overlay?.showRecording(true, 0, 0, duration);
+      overlay?.showToast(`录制指定时间段GIF (${duration.toFixed(1)}秒)...`, 'recording');
+
+      await recordGifAtRange(video, start, end, settings, {
+        onProgress(fraction, elapsed) {
+          overlay?.showRecording(true, fraction, elapsed, duration);
+        },
+        onComplete(blob, frameCount) {
+          overlay?.showRecording(false);
+          const filename = `movie-companion-${getTimestamp()}.gif`;
+          const url = URL.createObjectURL(blob);
+          overlay?.showPreview(url, filename, true);
+          overlay?.showToast(`GIF录制完成！(${frameCount}帧)`, 'success');
+        },
+        onError(error) {
+          overlay?.showRecording(false);
+          overlay?.showToast(error, 'error');
+        },
+      });
+    }
+
     function executeAction(action: string) {
       switch (action) {
         case 'screenshot': takeScreenshot(); break;
@@ -227,11 +298,32 @@ export default defineContentScript({
           burstCapture();
           sendResponse({ success: true });
           break;
+        case 'timedScreenshot':
+          if (message.settings) settings = { ...settings, ...(message.settings as Partial<Settings>) };
+          timedScreenshot(message.time as number);
+          sendResponse({ success: true });
+          break;
+        case 'timedScreenshotPoints':
+          if (message.settings) settings = { ...settings, ...(message.settings as Partial<Settings>) };
+          timedScreenshotPoints(message.times as number[]);
+          sendResponse({ success: true });
+          break;
+        case 'timedGif':
+          if (message.settings) settings = { ...settings, ...(message.settings as Partial<Settings>) };
+          timedGifRecording(message.start as number, message.end as number);
+          sendResponse({ success: true });
+          break;
         case 'checkVideo': {
           const video = findVideo();
           sendResponse(
             video
-              ? { hasVideo: true, videoWidth: video.videoWidth, videoHeight: video.videoHeight }
+              ? {
+                  hasVideo: true,
+                  videoWidth: video.videoWidth,
+                  videoHeight: video.videoHeight,
+                  duration: video.duration || 0,
+                  currentTime: video.currentTime || 0,
+                }
               : { hasVideo: false },
           );
           break;

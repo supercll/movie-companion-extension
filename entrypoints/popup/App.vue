@@ -7,6 +7,7 @@ import { presetsStorage, settingsStorage } from '@/utils/storage';
 import { getActiveTab, sendToContent } from '@/utils/messaging';
 import StatusBar from './components/StatusBar.vue';
 import ActionGrid from './components/ActionGrid.vue';
+import TimedActionPanel from './components/TimedActionPanel.vue';
 import PresetsPanel from './components/PresetsPanel.vue';
 import SettingsPanel from './components/SettingsPanel.vue';
 import HelpModal from './components/HelpModal.vue';
@@ -40,6 +41,55 @@ async function checkVideo() {
       : '未检测到视频';
   } catch {
     statusText.value = '无法连接到页面';
+  }
+}
+
+async function sendTimedAction(payload: {
+  type: string;
+  action: string;
+  time?: number;
+  times?: number[];
+  start?: number;
+  end?: number;
+}) {
+  const tab = await getActiveTab();
+  if (!tab?.id) {
+    statusText.value = '请先打开包含视频的页面';
+    return;
+  }
+  try {
+    if (payload.type === 'point') {
+      await sendToContent(tab.id, {
+        action: 'timedScreenshot',
+        time: payload.time,
+        settings: settings.value,
+      });
+      statusText.value = '正在跳转截图...';
+    } else if (payload.type === 'range' && payload.action === 'gif') {
+      await sendToContent(tab.id, {
+        action: 'timedGif',
+        start: payload.start,
+        end: payload.end,
+        settings: settings.value,
+      });
+      statusText.value = '正在录制指定时间段GIF...';
+    } else if (payload.type === 'range' && payload.action === 'screenshot') {
+      await sendToContent(tab.id, {
+        action: 'timedScreenshotPoints',
+        times: [payload.start, payload.end],
+        settings: settings.value,
+      });
+      statusText.value = '正在截图时间段起止帧...';
+    } else if (payload.type === 'points') {
+      await sendToContent(tab.id, {
+        action: 'timedScreenshotPoints',
+        times: payload.times,
+        settings: settings.value,
+      });
+      statusText.value = `正在截取 ${payload.times?.length} 个时间点...`;
+    }
+  } catch {
+    statusText.value = '请先打开包含视频的页面';
   }
 }
 
@@ -101,6 +151,12 @@ async function updatePresets(newPresets: Preset[]) {
         @preset="showPresets = !showPresets"
       />
     </section>
+
+    <TimedActionPanel
+      v-if="videoInfo.hasVideo"
+      :video-info="videoInfo"
+      @execute="sendTimedAction"
+    />
 
     <PresetsPanel v-if="showPresets" :presets="presets" @update="updatePresets" />
 
