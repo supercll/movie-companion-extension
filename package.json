@@ -16,10 +16,10 @@
   "dependencies": {
     "@wxt-dev/module-vue": "^1.0.3",
     "file-saver": "^2.0.5",
-    "gifenc": "^1.0.3",
     "hotkeys-js": "^4.0.2",
     "jszip": "^3.10.1",
     "lucide-vue-next": "^0.575.0",
+    "modern-gif": "^2.0.4",
     "vue": "^3.5.29",
     "wxt": "^0.20.18"
   },

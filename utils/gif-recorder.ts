@@ -1,4 +1,4 @@
-import { GIFEncoder, quantize, applyPalette } from 'gifenc';
+import { encode } from 'modern-gif';
 import type { Settings } from './types';
 
 export interface GifRecordingCallbacks {
@@ -50,33 +50,38 @@ export async function recordGif(
   canvas.height = h;
   const ctx = canvas.getContext('2d')!;
 
-  const gif = GIFEncoder();
   const totalFrames = Math.ceil(duration / frameInterval);
-  let framesCaptured = 0;
+  const frames: Array<{ data: ArrayBuffer; delay: number }> = [];
 
   try {
     for (let i = 0; i < totalFrames; i++) {
       if (signal.aborted) break;
 
       ctx.drawImage(video, 0, 0, w, h);
-      const imageData = ctx.getImageData(0, 0, w, h);
+      const { data } = ctx.getImageData(0, 0, w, h);
+      const copy = new Uint8Array(data.length);
+      copy.set(data);
+      frames.push({ data: copy.buffer, delay: frameInterval });
 
-      const palette = quantize(imageData.data, 256);
-      const index = applyPalette(imageData.data, palette);
-      gif.writeFrame(index, w, h, { palette, delay: frameInterval });
-
-      framesCaptured++;
       callbacks.onProgress((i + 1) / totalFrames, ((i + 1) * frameInterval) / 1000);
 
       await new Promise((r) => setTimeout(r, frameInterval));
     }
 
-    gif.finish();
-    const bytes = gif.bytes();
-    const copy = new Uint8Array(bytes.length);
-    copy.set(bytes);
-    const blob = new Blob([copy], { type: 'image/gif' });
-    callbacks.onComplete(blob, framesCaptured);
+    if (signal.aborted && frames.length === 0) {
+      callbacks.onError('录制已取消');
+      return;
+    }
+
+    const output = await encode({
+      width: w,
+      height: h,
+      frames,
+      maxColors: Math.max(2, Math.min(255, 256 - (settings.gifQuality ?? 10))),
+    });
+
+    const blob = new Blob([output], { type: 'image/gif' });
+    callbacks.onComplete(blob, frames.length);
   } catch (err) {
     callbacks.onError(err instanceof Error ? err.message : 'GIF录制失败');
   } finally {
