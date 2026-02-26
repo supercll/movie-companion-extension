@@ -1,0 +1,125 @@
+@import "tailwindcss";
+
+/* All content overlay styles are scoped inside Shadow DOM */
+
+.mc-flash {
+  @apply fixed inset-0 z-[2147483646] pointer-events-none;
+  background: white;
+  animation: mc-flash 0.3s ease-out forwards;
+}
+
+@keyframes mc-flash {
+  0% { opacity: 0.6; }
+  100% { opacity: 0; }
+}
+
+.mc-toast {
+  @apply fixed top-5 right-5 z-[2147483647];
+  @apply flex items-center gap-2.5 px-5 py-3;
+  @apply rounded-xl text-sm text-gray-200;
+  background: rgba(15, 15, 26, 0.95);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+  animation: mc-slide-in 0.3s ease-out;
+  max-width: 350px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+}
+
+.mc-toast--success { border-color: rgba(74, 222, 128, 0.4); }
+.mc-toast--error { border-color: rgba(248, 113, 113, 0.4); }
+.mc-toast--recording { border-color: rgba(248, 113, 113, 0.5); }
+
+.mc-toast__icon { @apply text-lg shrink-0; }
+.mc-toast__text { @apply flex-1; }
+
+@keyframes mc-slide-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.mc-recording {
+  @apply fixed top-5 left-1/2 -translate-x-1/2 z-[2147483647];
+  @apply flex items-center gap-2 px-5 py-2 rounded-full;
+  @apply text-white text-sm font-medium;
+  background: rgba(220, 38, 38, 0.9);
+  backdrop-filter: blur(10px);
+  animation: mc-slide-in 0.3s ease-out;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+}
+
+.mc-recording__dot {
+  @apply w-2.5 h-2.5 rounded-full bg-white;
+  animation: mc-blink 1s infinite;
+}
+
+.mc-recording__time { @apply tabular-nums; }
+
+.mc-recording__bar {
+  @apply w-16 h-1 rounded-full overflow-hidden;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.mc-recording__bar-fill {
+  @apply h-full rounded-full transition-[width] duration-300;
+  background: white;
+}
+
+@keyframes mc-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.mc-preview {
+  @apply fixed bottom-5 right-5 z-[2147483647];
+  @apply p-2 rounded-xl cursor-pointer;
+  background: rgba(15, 15, 26, 0.95);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  animation: mc-slide-in 0.3s ease-out;
+  transition: transform 0.2s;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+}
+
+.mc-preview:hover { transform: scale(1.02); }
+
+.mc-preview__img {
+  @apply max-w-[200px] max-h-[150px] rounded-lg block;
+}
+
+.mc-preview__actions {
+  @apply flex gap-1.5 mt-1.5 justify-center;
+}
+
+.mc-preview__btn {
+  @apply px-3 py-1 border-none rounded-md text-xs cursor-pointer transition-colors;
+}
+
+.mc-preview__btn--save {
+  @apply text-white;
+  background: #a78bfa;
+}
+.mc-preview__btn--save:hover { background: #8b5cf6; }
+
+.mc-preview__btn--close {
+  background: #333;
+  color: #aaa;
+}
+.mc-preview__btn--close:hover { background: #444; }
+
+.mc-hint {
+  @apply fixed bottom-16 left-1/2 -translate-x-1/2 z-[2147483647];
+  @apply px-4 py-1.5 rounded-full text-xs pointer-events-none;
+  color: #a78bfa;
+  background: rgba(15, 15, 26, 0.9);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  backdrop-filter: blur(10px);
+  animation: mc-fade-in 0.3s ease-out;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+}
+
+@keyframes mc-fade-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
