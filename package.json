@@ -21,6 +21,7 @@
     "lucide-vue-next": "^0.575.0",
     "modern-gif": "^2.0.4",
     "vue": "^3.5.29",
+    "vue-i18n": "^11.2.8",
     "wxt": "^0.20.18"
   },
   "devDependencies": {

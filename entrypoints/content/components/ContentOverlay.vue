@@ -67,7 +67,7 @@ defineExpose({ showToast, showPreview, showRecording, showFlash });
     <div class="mc-recording__bar">
       <div class="mc-recording__bar-fill" :style="{ width: `${recording.progress * 100}%` }" />
     </div>
-    <button class="mc-recording__stop" title="停止录制" @click="emit('stopRecording')">
+    <button class="mc-recording__stop" :title="$t('overlay.stopRecording')" @click="emit('stopRecording')">
       <span class="mc-recording__stop-icon" />
     </button>
   </div>
@@ -80,13 +80,13 @@ defineExpose({ showToast, showPreview, showRecording, showFlash });
         class="mc-preview__btn mc-preview__btn--save"
         @click="emit('save', preview!.url, preview!.filename); preview = null"
       >
-        保存
+        {{ $t('overlay.save') }}
       </button>
       <button
         class="mc-preview__btn mc-preview__btn--close"
         @click="if (preview?.isBlob) globalURL.revokeObjectURL(preview.url); preview = null"
       >
-        关闭
+        {{ $t('overlay.close') }}
       </button>
     </div>
   </div>

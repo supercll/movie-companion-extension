@@ -14,21 +14,21 @@ const btnClass =
 
 <template>
   <div class="grid grid-cols-4 gap-2">
-    <button :class="btnClass" title="截取当前视频画面" @click="$emit('screenshot')">
+    <button :class="btnClass" :title="$t('action.screenshotTip')" @click="$emit('screenshot')">
       <Camera :size="20" />
-      <span>截图</span>
+      <span>{{ $t('action.screenshot') }}</span>
     </button>
-    <button :class="btnClass" title="录制视频GIF动图" @click="$emit('gif')">
+    <button :class="btnClass" :title="$t('action.gifTip')" @click="$emit('gif')">
       <Circle :size="20" />
-      <span>GIF</span>
+      <span>{{ $t('action.gif') }}</span>
     </button>
-    <button :class="btnClass" title="录制视频片段(含声音)" @click="$emit('video')">
+    <button :class="btnClass" :title="$t('action.recordTip')" @click="$emit('video')">
       <Video :size="20" />
-      <span>录制</span>
+      <span>{{ $t('action.record') }}</span>
     </button>
-    <button :class="btnClass" title="连续截取多张图片" @click="$emit('burst')">
+    <button :class="btnClass" :title="$t('action.burstTip')" @click="$emit('burst')">
       <Layers :size="20" />
-      <span>连拍</span>
+      <span>{{ $t('action.burst') }}</span>
     </button>
   </div>
 </template>

@@ -5,8 +5,9 @@ import pkg from './package.json';
 export default defineConfig({
   modules: ['@wxt-dev/module-vue'],
   manifest: {
-    name: '观影伴侣 - Movie Companion',
-    description: '智能观影伴侣：自动截图视频画面、录制GIF动图',
+    name: '__MSG_extName__',
+    description: '__MSG_extDescription__',
+    default_locale: 'en',
     permissions: ['activeTab', 'storage', 'downloads'],
     host_permissions: ['<all_urls>'],
     icons: {

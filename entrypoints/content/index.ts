@@ -9,6 +9,7 @@ import { downloadDataUrl, downloadBlob } from '@/utils/downloader';
 import { settingsStorage } from '@/utils/storage';
 import type { Settings } from '@/utils/types';
 import { DEFAULT_SETTINGS } from '@/utils/constants';
+import { i18n, t, resolveLocale, setLocale } from '@/utils/i18n';
 import ContentOverlay from './components/ContentOverlay.vue';
 
 interface OverlayInstance {
@@ -26,9 +27,13 @@ export default defineContentScript({
     let settings: Settings = { ...DEFAULT_SETTINGS };
 
     settings = (await settingsStorage.getValue()) ?? DEFAULT_SETTINGS;
+    setLocale(resolveLocale(settings.locale));
 
     settingsStorage.watch((newVal) => {
-      if (newVal) settings = newVal;
+      if (newVal) {
+        settings = newVal;
+        setLocale(resolveLocale(newVal.locale));
+      }
     });
 
     // --- UI Overlay (Vue) ---
@@ -54,6 +59,7 @@ export default defineContentScript({
             }
           },
         });
+        app.use(i18n);
         const vm = app.mount(wrapper) as ComponentPublicInstance & OverlayInstance;
         overlay = vm;
         return app;
@@ -69,7 +75,7 @@ export default defineContentScript({
     function takeScreenshot() {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
       overlay?.showFlash();
@@ -78,17 +84,17 @@ export default defineContentScript({
       const ext = format === 'jpeg' ? 'jpg' : format;
       const filename = `movie-companion-${getTimestamp()}.${ext}`;
       overlay?.showPreview(dataUrl, filename);
-      overlay?.showToast('截图成功！', 'success');
+      overlay?.showToast(t('toast.screenshotOk'), 'success');
     }
 
     async function burstCapture() {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
       const count = 5;
-      overlay?.showToast(`连拍开始 (${count}张)...`, 'recording');
+      overlay?.showToast(t('toast.burstStart', { n: count }), 'recording');
 
       for (let i = 0; i < count; i++) {
         await new Promise((r) => setTimeout(r, 500));
@@ -99,22 +105,22 @@ export default defineContentScript({
         const filename = `movie-companion-burst-${getTimestamp()}-${i + 1}.${ext}`;
         downloadDataUrl(dataUrl, filename);
       }
-      overlay?.showToast(`连拍完成！已保存 ${count} 张图片`, 'success');
+      overlay?.showToast(t('toast.burstDone', { n: count }), 'success');
     }
 
     async function startGifRecording() {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
       if (isRecording()) {
-        overlay?.showToast('正在录制中...', 'error');
+        overlay?.showToast(t('toast.recording'), 'error');
         return;
       }
 
       overlay?.showRecording(true, 0, 0, settings.gifDuration);
-      overlay?.showToast(`录制GIF中 (${settings.gifDuration}秒)...`, 'recording');
+      overlay?.showToast(t('toast.gifRecording', { n: settings.gifDuration }), 'recording');
 
       await recordGif(video, settings, {
         onProgress(fraction, elapsed) {
@@ -125,7 +131,7 @@ export default defineContentScript({
           const filename = `movie-companion-${getTimestamp()}.gif`;
           const url = URL.createObjectURL(blob);
           overlay?.showPreview(url, filename, true);
-          overlay?.showToast(`GIF录制完成！(${frameCount}帧)`, 'success');
+          overlay?.showToast(t('toast.gifDone', { n: frameCount }), 'success');
         },
         onError(error) {
           overlay?.showRecording(false);
@@ -137,54 +143,54 @@ export default defineContentScript({
     async function timedScreenshot(time: number) {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
-      overlay?.showToast(`正在跳转到指定时间截图...`, 'info');
+      overlay?.showToast(t('toast.timedSeek'), 'info');
       try {
         const { dataUrl, filename } = await screenshotAtTime(video, time, settings);
         overlay?.showFlash();
         overlay?.showPreview(dataUrl, filename);
-        overlay?.showToast('定时截图成功！', 'success');
+        overlay?.showToast(t('toast.timedScreenshotOk'), 'success');
       } catch (err) {
-        overlay?.showToast(err instanceof Error ? err.message : '定时截图失败', 'error');
+        overlay?.showToast(err instanceof Error ? err.message : t('toast.timedScreenshotFail'), 'error');
       }
     }
 
     async function timedScreenshotPoints(times: number[]) {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
-      overlay?.showToast(`正在截取 ${times.length} 个时间点...`, 'recording');
+      overlay?.showToast(t('toast.batchCapturing', { n: times.length }), 'recording');
       try {
         const results = await screenshotAtPoints(video, times, settings, (current, total) => {
-          overlay?.showToast(`截图进度: ${current}/${total}`, 'recording');
+          overlay?.showToast(t('toast.batchProgress', { current, total }), 'recording');
         });
         for (const { dataUrl, filename } of results) {
           overlay?.showFlash();
           downloadDataUrl(dataUrl, filename);
         }
-        overlay?.showToast(`完成！已保存 ${results.length} 张截图`, 'success');
+        overlay?.showToast(t('toast.batchDone', { n: results.length }), 'success');
       } catch (err) {
-        overlay?.showToast(err instanceof Error ? err.message : '批量截图失败', 'error');
+        overlay?.showToast(err instanceof Error ? err.message : t('toast.batchFail'), 'error');
       }
     }
 
     async function timedGifRecording(start: number, end: number) {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
       if (isRecording()) {
-        overlay?.showToast('正在录制中...', 'error');
+        overlay?.showToast(t('toast.recording'), 'error');
         return;
       }
       const duration = end - start;
       overlay?.showRecording(true, 0, 0, duration);
-      overlay?.showToast(`录制指定时间段GIF (${duration.toFixed(1)}秒)...`, 'recording');
+      overlay?.showToast(t('toast.timedGifRecording', { n: duration.toFixed(1) }), 'recording');
 
       await recordGifAtRange(video, start, end, settings, {
         onProgress(fraction, elapsed) {
@@ -195,7 +201,7 @@ export default defineContentScript({
           const filename = `movie-companion-${getTimestamp()}.gif`;
           const url = URL.createObjectURL(blob);
           overlay?.showPreview(url, filename, true);
-          overlay?.showToast(`GIF录制完成！(${frameCount}帧)`, 'success');
+          overlay?.showToast(t('toast.gifDone', { n: frameCount }), 'success');
         },
         onError(error) {
           overlay?.showRecording(false);
@@ -207,17 +213,17 @@ export default defineContentScript({
     function recordVideo() {
       const video = findVideo();
       if (!video) {
-        overlay?.showToast('未找到视频元素', 'error');
+        overlay?.showToast(t('toast.noVideo'), 'error');
         return;
       }
       if (isVideoRecording()) {
         stopVideoRecording();
-        overlay?.showToast('正在停止录制...', 'info');
+        overlay?.showToast(t('toast.stoppingRecord'), 'info');
         return;
       }
 
       overlay?.showRecording(true, 0, 0, settings.videoDuration);
-      overlay?.showToast(`录制视频中 (${settings.videoDuration}秒)...`, 'recording');
+      overlay?.showToast(t('toast.videoRecording', { n: settings.videoDuration }), 'recording');
 
       startVideoRecording(video, settings, {
         onProgress(elapsed, total) {
@@ -229,7 +235,7 @@ export default defineContentScript({
           const ext = getFormatExtension(fmt);
           const filename = `movie-companion-${getTimestamp()}.${ext}`;
           downloadBlob(blob, filename);
-          overlay?.showToast(`视频录制完成！(${duration.toFixed(1)}秒)`, 'success');
+          overlay?.showToast(t('toast.videoDone', { n: duration.toFixed(1) }), 'success');
         },
         onError(error) {
           overlay?.showRecording(false);
@@ -316,8 +322,8 @@ export default defineContentScript({
           if (message.settings) settings = { ...settings, ...(message.settings as Partial<Settings>) };
           const tvideo = findVideo();
           if (!tvideo) {
-            overlay?.showToast('未找到视频元素', 'error');
-            sendResponse({ success: false, error: '未找到视频' });
+            overlay?.showToast(t('toast.noVideo'), 'error');
+            sendResponse({ success: false, error: t('toast.noVideoFound') });
             break;
           }
           const tstart = message.start as number;
@@ -329,7 +335,7 @@ export default defineContentScript({
           tvideo.play();
 
           overlay?.showRecording(true, 0, 0, tdur);
-          overlay?.showToast(`录制视频 ${tstart.toFixed(1)}s - ${tend.toFixed(1)}s...`, 'recording');
+          overlay?.showToast(t('toast.timedVideoRecording', { start: tstart.toFixed(1), end: tend.toFixed(1) }), 'recording');
 
           const overrideSettings = { ...settings, videoDuration: tdur };
           startVideoRecording(tvideo, overrideSettings, {
@@ -343,7 +349,7 @@ export default defineContentScript({
               const ext = getFormatExtension(fmt);
               const filename = `movie-companion-${getTimestamp()}.${ext}`;
               downloadBlob(blob, filename);
-              overlay?.showToast(`视频录制完成！(${duration.toFixed(1)}秒)`, 'success');
+              overlay?.showToast(t('toast.videoDone', { n: duration.toFixed(1) }), 'success');
             },
             onError(error) {
               overlay?.showRecording(false);

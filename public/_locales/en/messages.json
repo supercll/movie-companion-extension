@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "Movie Companion",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "Smart movie companion: screenshot video frames, record GIFs and video clips",
+    "description": "Extension description"
+  }
+}

@@ -2,6 +2,7 @@ import { encode } from 'modern-gif';
 import { captureVideoFrame, getTimestamp } from './video';
 import type { Settings } from './types';
 import type { GifRecordingCallbacks } from './gif-recorder';
+import { t } from './i18n';
 
 function waitForSeek(video: HTMLVideoElement): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -11,7 +12,7 @@ function waitForSeek(video: HTMLVideoElement): Promise<void> {
     };
     const onError = () => {
       cleanup();
-      reject(new Error('视频 seek 失败'));
+      reject(new Error(t('error.seekFailed')));
     };
     const cleanup = () => {
       video.removeEventListener('seeked', onSeeked);
@@ -148,7 +149,7 @@ export async function recordGifAtRange(
     }
 
     if (frames.length === 0) {
-      callbacks.onError('未能捕获任何帧');
+      callbacks.onError(t('error.noFrames'));
       return;
     }
 
@@ -162,7 +163,7 @@ export async function recordGifAtRange(
     const blob = new Blob([output], { type: 'image/gif' });
     callbacks.onComplete(blob, frames.length);
   } catch (err) {
-    callbacks.onError(err instanceof Error ? err.message : 'GIF录制失败');
+    callbacks.onError(err instanceof Error ? err.message : t('error.gifFailed'));
   } finally {
     video.currentTime = originalTime;
     await waitForSeek(video).catch(() => {});

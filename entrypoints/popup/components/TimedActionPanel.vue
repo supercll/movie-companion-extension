@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Clock, Camera, Circle, Video, AlertCircle } from 'lucide-vue-next';
 import { parseTimedInput, formatTime } from '@/utils/time-parser';
 import type { TimedActionType, VideoInfo } from '@/utils/types';
+
+const { t } = useI18n();
 
 const props = defineProps<{
   videoInfo: VideoInfo;
@@ -24,18 +27,18 @@ const parsed = computed(() => {
 
 const validationError = computed(() => {
   if (!timeInput.value.trim()) return null;
-  if (!parsed.value) return '无法识别时间格式';
+  if (!parsed.value) return t('timed.errorUnrecognized');
 
   const duration = props.videoInfo.duration ?? 0;
   if (duration <= 0) return null;
 
   if (parsed.value.type === 'point') {
-    if (parsed.value.time > duration) return `超出视频时长 (${formatTime(duration)})`;
+    if (parsed.value.time > duration) return t('timed.errorExceedDuration', { time: formatTime(duration) });
   } else if (parsed.value.type === 'range') {
-    if (parsed.value.end > duration) return `结束时间超出视频时长 (${formatTime(duration)})`;
+    if (parsed.value.end > duration) return t('timed.errorEndExceed', { time: formatTime(duration) });
   } else if (parsed.value.type === 'points') {
     const max = Math.max(...parsed.value.times);
-    if (max > duration) return `时间点超出视频时长 (${formatTime(duration)})`;
+    if (max > duration) return t('timed.errorPointExceed', { time: formatTime(duration) });
   }
   return null;
 });
@@ -44,21 +47,28 @@ const description = computed(() => {
   if (!parsed.value) return '';
   const a = action.value;
   if (parsed.value.type === 'point') {
-    if (a === 'screenshot') return `在 ${formatTime(parsed.value.time)} 处截图`;
-    return `无法对单个时间点录制，请输入时间段`;
+    if (a === 'screenshot') return t('timed.descScreenshotAt', { time: formatTime(parsed.value.time) });
+    return t('timed.descCannotRecordPoint');
   }
   if (parsed.value.type === 'range') {
     const dur = parsed.value.end - parsed.value.start;
     const rangeLabel = `${formatTime(parsed.value.start)} - ${formatTime(parsed.value.end)}`;
-    if (a === 'screenshot') return `在 ${rangeLabel} 范围内截图`;
-    if (a === 'gif') return `录制 ${rangeLabel} 的GIF (${dur.toFixed(1)}秒)`;
-    return `录制 ${rangeLabel} 的视频 (${dur.toFixed(1)}秒，含声音)`;
+    if (a === 'screenshot') return t('timed.descScreenshotRange', { range: rangeLabel });
+    if (a === 'gif') return t('timed.descGifRange', { range: rangeLabel, n: dur.toFixed(1) });
+    return t('timed.descVideoRange', { range: rangeLabel, n: dur.toFixed(1) });
   }
   if (parsed.value.type === 'points') {
-    if (a === 'screenshot') return `在 ${parsed.value.times.length} 个时间点分别截图`;
-    return `无法对多个时间点录制，请输入时间段`;
+    if (a === 'screenshot') return t('timed.descScreenshotPoints', { n: parsed.value.times.length });
+    return t('timed.descCannotRecordPoints');
   }
   return '';
+});
+
+const formatHintHtml = computed(() => {
+  const point = `<code class="text-gray-500">${t('timed.formatPoint')}</code>`;
+  const range = `<code class="text-gray-500">${t('timed.formatRange')}</code>`;
+  const multi = `<code class="text-gray-500">${t('timed.formatMulti')}</code>`;
+  return t('timed.formatHint', { point, range, multi });
 });
 
 const canExecute = computed(() => {
@@ -87,23 +97,23 @@ function execute() {
   <section class="bg-[#1a1a2e] rounded-xl p-3.5 mb-3">
     <h2 class="flex items-center gap-1.5 text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
       <Clock :size="14" />
-      定时操作
+      {{ $t('timed.title') }}
     </h2>
 
     <p class="text-xs text-gray-600 mb-2">
-      输入时间点或时间段，对视频指定位置截图/录制
+      {{ $t('timed.description') }}
     </p>
 
     <!-- No video hint -->
     <div v-if="!videoInfo.hasVideo" class="text-xs text-gray-600 mb-2.5 flex items-center gap-1">
       <AlertCircle :size="12" class="text-gray-600" />
-      等待检测到视频后可使用
+      {{ $t('timed.noVideoHint') }}
     </div>
 
     <!-- Video time info -->
     <div v-else-if="videoInfo.duration" class="flex gap-3 text-xs text-gray-500 mb-2.5">
-      <span>时长: {{ formatTime(videoInfo.duration) }}</span>
-      <span v-if="videoInfo.currentTime !== undefined">当前: {{ formatTime(videoInfo.currentTime) }}</span>
+      <span>{{ $t('timed.duration') }}: {{ formatTime(videoInfo.duration) }}</span>
+      <span v-if="videoInfo.currentTime !== undefined">{{ $t('timed.current') }}: {{ formatTime(videoInfo.currentTime) }}</span>
     </div>
 
     <!-- Time input -->
@@ -111,7 +121,7 @@ function execute() {
       <input
         v-model="timeInput"
         type="text"
-        placeholder="如: 1:05  或  1:00-1:10  或  0:30,1:00,1:30"
+        :placeholder="$t('timed.placeholder')"
         :disabled="!videoInfo.hasVideo"
         class="flex-1 px-2.5 py-2 bg-[#0f0f1a] border border-[#2a2a4a] rounded-lg text-gray-200 text-[13px] outline-none focus:border-violet-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         @keydown.enter="execute"
@@ -128,7 +138,7 @@ function execute() {
           class="accent-violet-400"
         />
         <Camera :size="14" class="text-gray-400" />
-        <span class="text-xs text-gray-400">截图</span>
+        <span class="text-xs text-gray-400">{{ $t('timed.screenshot') }}</span>
       </label>
 
       <label class="flex items-center gap-1 cursor-pointer ml-3">
@@ -150,7 +160,7 @@ function execute() {
           class="accent-violet-400"
         />
         <Video :size="14" class="text-gray-400" />
-        <span class="text-xs text-gray-400">视频</span>
+        <span class="text-xs text-gray-400">{{ $t('timed.video') }}</span>
       </label>
 
       <button
@@ -158,7 +168,7 @@ function execute() {
         :disabled="!canExecute"
         @click="execute"
       >
-        执行
+        {{ $t('timed.execute') }}
       </button>
     </div>
 
@@ -173,7 +183,7 @@ function execute() {
 
     <!-- Format hints -->
     <div class="mt-2 text-[11px] text-gray-700 space-y-0.5">
-      <p>格式: <code class="text-gray-500">1:05</code> 单点 · <code class="text-gray-500">1:00-1:10</code> 时间段 · <code class="text-gray-500">0:30,1:00,1:30</code> 多点</p>
+      <p v-html="formatHintHtml" />
     </div>
   </section>
 </template>

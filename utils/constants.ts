@@ -1,6 +1,7 @@
 import type { Settings } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
+  locale: 'auto',
   gifDuration: 3,
   gifFps: 10,
   gifQuality: 15,

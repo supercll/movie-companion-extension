@@ -1,4 +1,5 @@
 import type { Settings } from './types';
+import { t } from './i18n';
 
 declare global {
   interface HTMLVideoElement {
@@ -55,7 +56,7 @@ export function startVideoRecording(
   callbacks: VideoRecordingCallbacks,
 ): void {
   if (isVideoRecording()) {
-    callbacks.onError('正在录制中...');
+    callbacks.onError(t('error.recordingInProgress'));
     return;
   }
 
@@ -63,12 +64,12 @@ export function startVideoRecording(
   try {
     stream = video.captureStream();
   } catch {
-    callbacks.onError('无法捕获视频流（可能受跨域限制）');
+    callbacks.onError(t('error.cannotCaptureStream'));
     return;
   }
 
   if (stream.getVideoTracks().length === 0) {
-    callbacks.onError('视频流中没有视频轨道');
+    callbacks.onError(t('error.noVideoTrack'));
     return;
   }
 
@@ -99,7 +100,7 @@ export function startVideoRecording(
       videoBitsPerSecond: bitrate,
     });
   } catch {
-    callbacks.onError(`不支持的录制格式: ${mimeType}`);
+    callbacks.onError(t('error.unsupportedFormat', { fmt: mimeType }));
     return;
   }
 
@@ -117,7 +118,7 @@ export function startVideoRecording(
     clearTimeout(stopTimer);
 
     if (chunks.length === 0) {
-      callbacks.onError('未录制到任何数据');
+      callbacks.onError(t('error.noData'));
       return;
     }
 
@@ -129,7 +130,7 @@ export function startVideoRecording(
   recorder.onerror = () => {
     activeRecorder = null;
     clearTimeout(stopTimer);
-    callbacks.onError('录制过程中发生错误');
+    callbacks.onError(t('error.recordingError'));
   };
 
   recorder.start(1000);

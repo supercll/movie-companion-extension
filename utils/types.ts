@@ -4,6 +4,7 @@ export type TimedActionType = 'screenshot' | 'gif' | 'video';
 
 
 export interface Settings {
+  locale: 'auto' | 'en' | 'zh';
   gifDuration: number;
   gifFps: number;
   gifQuality: number;

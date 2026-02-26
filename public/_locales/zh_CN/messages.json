@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "观影伴侣 - Movie Companion",
+    "description": "Extension name"
+  },
+  "extDescription": {
+    "message": "智能观影伴侣：自动截图视频画面、录制GIF动图和视频片段",
+    "description": "Extension description"
+  }
+}

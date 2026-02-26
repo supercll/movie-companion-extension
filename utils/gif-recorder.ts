@@ -1,5 +1,6 @@
 import { encode } from 'modern-gif';
 import type { Settings } from './types';
+import { t } from './i18n';
 
 export interface GifRecordingCallbacks {
   onProgress: (fraction: number, elapsed: number) => void;
@@ -23,7 +24,7 @@ export async function recordGif(
   callbacks: GifRecordingCallbacks,
 ): Promise<void> {
   if (abortController) {
-    callbacks.onError('正在录制中...');
+    callbacks.onError(t('error.recordingInProgress'));
     return;
   }
 
@@ -69,7 +70,7 @@ export async function recordGif(
     }
 
     if (signal.aborted && frames.length === 0) {
-      callbacks.onError('录制已取消');
+      callbacks.onError(t('error.recordingCancelled'));
       return;
     }
 
@@ -83,7 +84,7 @@ export async function recordGif(
     const blob = new Blob([output], { type: 'image/gif' });
     callbacks.onComplete(blob, frames.length);
   } catch (err) {
-    callbacks.onError(err instanceof Error ? err.message : 'GIF录制失败');
+    callbacks.onError(err instanceof Error ? err.message : t('error.gifFailed'));
   } finally {
     abortController = null;
   }

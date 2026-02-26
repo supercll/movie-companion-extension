@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { Film, Settings as SettingsIcon, RefreshCw } from 'lucide-vue-next';
 import type { Settings, VideoInfo } from '@/utils/types';
 import { DEFAULT_SETTINGS } from '@/utils/constants';
 import { settingsStorage } from '@/utils/storage';
 import { getActiveTab, sendToContent } from '@/utils/messaging';
+import { resolveLocale, setLocale } from '@/utils/i18n';
 import StatusBar from './components/StatusBar.vue';
 import ActionGrid from './components/ActionGrid.vue';
 import TimedActionPanel from './components/TimedActionPanel.vue';
@@ -13,19 +15,26 @@ import HelpModal from './components/HelpModal.vue';
 
 declare const __APP_VERSION__: string;
 
+const { t } = useI18n();
 const version = __APP_VERSION__;
 const settings = ref<Settings>({ ...DEFAULT_SETTINGS });
 const videoInfo = ref<VideoInfo>({ hasVideo: false });
-const statusText = ref('等待检测视频...');
+const statusKey = ref<{ key: string; params?: Record<string, unknown> }>({ key: 'status.waiting' });
+const statusText = computed(() => t(statusKey.value.key, statusKey.value.params ?? {}));
 const showSettings = ref(false);
 const showHelp = ref(false);
 const checking = ref(false);
 
 let pollTimer: ReturnType<typeof setInterval> | undefined;
 
+watch(() => settings.value.locale, (loc) => {
+  setLocale(resolveLocale(loc));
+}, { immediate: false });
+
 onMounted(async () => {
   const s = await settingsStorage.getValue();
   if (s) settings.value = s;
+  setLocale(resolveLocale(settings.value.locale));
   await checkVideo();
 
   if (!videoInfo.value.hasVideo) {
@@ -50,18 +59,18 @@ async function checkVideo() {
   checking.value = true;
   const tab = await getActiveTab();
   if (!tab?.id) {
-    statusText.value = '无法连接到页面';
+    statusKey.value = { key: 'status.noConnection' };
     checking.value = false;
     return;
   }
   try {
     const res = (await sendToContent(tab.id, { action: 'checkVideo' })) as VideoInfo;
     videoInfo.value = res;
-    statusText.value = res.hasVideo
-      ? `检测到视频 (${res.videoWidth}×${res.videoHeight})`
-      : '未检测到视频';
+    statusKey.value = res.hasVideo
+      ? { key: 'status.detected', params: { w: res.videoWidth, h: res.videoHeight } }
+      : { key: 'status.notDetected' };
   } catch {
-    statusText.value = '无法连接到页面';
+    statusKey.value = { key: 'status.noConnection' };
   }
   checking.value = false;
 }
@@ -76,7 +85,7 @@ async function sendTimedAction(payload: {
 }) {
   const tab = await getActiveTab();
   if (!tab?.id) {
-    statusText.value = '请先打开包含视频的页面';
+    statusKey.value = { key: 'status.openVideoPage' };
     return;
   }
   try {
@@ -86,7 +95,7 @@ async function sendTimedAction(payload: {
         time: payload.time,
         settings: settings.value,
       });
-      statusText.value = '正在跳转截图...';
+      statusKey.value = { key: 'command.seekingScreenshot' };
     } else if (payload.type === 'range' && payload.action === 'gif') {
       await sendToContent(tab.id, {
         action: 'timedGif',
@@ -94,7 +103,7 @@ async function sendTimedAction(payload: {
         end: payload.end,
         settings: settings.value,
       });
-      statusText.value = '正在录制指定时间段GIF...';
+      statusKey.value = { key: 'command.timedGif' };
     } else if (payload.type === 'range' && payload.action === 'video') {
       await sendToContent(tab.id, {
         action: 'timedVideo',
@@ -102,44 +111,44 @@ async function sendTimedAction(payload: {
         end: payload.end,
         settings: settings.value,
       });
-      statusText.value = '正在录制指定时间段视频...';
+      statusKey.value = { key: 'command.timedVideo' };
     } else if (payload.type === 'range' && payload.action === 'screenshot') {
       await sendToContent(tab.id, {
         action: 'timedScreenshotPoints',
         times: [payload.start, payload.end],
         settings: settings.value,
       });
-      statusText.value = '正在截图时间段起止帧...';
+      statusKey.value = { key: 'command.timedRangeScreenshot' };
     } else if (payload.type === 'points') {
       await sendToContent(tab.id, {
         action: 'timedScreenshotPoints',
         times: payload.times,
         settings: settings.value,
       });
-      statusText.value = `正在截取 ${payload.times?.length} 个时间点...`;
+      statusKey.value = { key: 'command.timedPoints', params: { n: payload.times?.length } };
     }
   } catch {
-    statusText.value = '请先打开包含视频的页面';
+    statusKey.value = { key: 'status.openVideoPage' };
   }
 }
 
 async function sendCommand(action: string) {
   const tab = await getActiveTab();
   if (!tab?.id) {
-    statusText.value = '请先打开包含视频的页面';
+    statusKey.value = { key: 'status.openVideoPage' };
     return;
   }
   try {
     await sendToContent(tab.id, { action, settings: settings.value });
-    const labels: Record<string, string> = {
-      screenshot: '正在截图...',
-      gif: '开始录制GIF...',
-      video: '开始录制视频...',
-      burst: '开始连拍...',
+    const keyMap: Record<string, string> = {
+      screenshot: 'command.screenshotting',
+      gif: 'command.startGif',
+      video: 'command.startVideo',
+      burst: 'command.startBurst',
     };
-    statusText.value = labels[action] ?? '执行中...';
+    statusKey.value = { key: keyMap[action] ?? 'command.executing' };
   } catch {
-    statusText.value = '请先打开包含视频的页面';
+    statusKey.value = { key: 'status.openVideoPage' };
   }
 }
 
@@ -147,7 +156,6 @@ async function updateSettings(patch: Partial<Settings>) {
   Object.assign(settings.value, patch);
   await settingsStorage.setValue({ ...settings.value });
 }
-
 </script>
 
 <template>
@@ -159,13 +167,13 @@ async function updateSettings(patch: Partial<Settings>) {
         <h1
           class="text-lg font-semibold bg-gradient-to-r from-violet-400 to-blue-400 bg-clip-text text-transparent"
         >
-          观影伴侣
+          {{ $t('app.title') }}
         </h1>
       </div>
       <div class="flex items-center gap-2">
         <button
           class="bg-transparent border-none text-gray-500 cursor-pointer p-1.5 rounded-lg hover:bg-[#1a1a2e] hover:text-violet-400 transition-colors"
-          title="设置"
+          :title="$t('settings.title')"
           @click="showSettings = true"
         >
           <SettingsIcon :size="18" />
@@ -178,7 +186,7 @@ async function updateSettings(patch: Partial<Settings>) {
       <StatusBar :text="statusText" :active="videoInfo.hasVideo" class="flex-1" />
       <button
         class="shrink-0 p-2 bg-[#1a1a2e] border border-[#2a2a4a] rounded-xl text-gray-500 cursor-pointer hover:text-violet-400 hover:border-violet-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-        title="重新检测视频"
+        :title="$t('status.refreshVideo')"
         :disabled="checking"
         @click="checkVideo"
       >
@@ -188,7 +196,7 @@ async function updateSettings(patch: Partial<Settings>) {
 
     <section class="mb-4">
       <h2 class="text-[13px] font-medium text-gray-500 uppercase tracking-wide mb-2.5">
-        快捷操作
+        {{ $t('action.quickActions') }}
       </h2>
       <ActionGrid
         @screenshot="sendCommand('screenshot')"
@@ -208,14 +216,14 @@ async function updateSettings(patch: Partial<Settings>) {
         class="text-gray-600 text-xs hover:text-violet-400 transition-colors bg-transparent border-none cursor-pointer"
         @click="showHelp = true"
       >
-        使用帮助
+        {{ $t('footer.help') }}
       </button>
       <span class="text-gray-700 text-xs">|</span>
       <button
         class="text-gray-600 text-xs hover:text-violet-400 transition-colors bg-transparent border-none cursor-pointer"
         @click="showHelp = true"
       >
-        快捷键
+        {{ $t('footer.shortcuts') }}
       </button>
     </footer>
 
