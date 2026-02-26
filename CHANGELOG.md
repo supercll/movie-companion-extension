@@ -1,5 +1,15 @@
 # Changelog
 
+## [2.2.1](https://github-lc/supercll/movie-companion-extension/compare/v2.2.0...v2.2.1) (2026-02-26)
+
+### ✨ Features
+
+* add stop recording functionality for GIF and video recordings ([8a2374a](https://github-lc/supercll/movie-companion-extension/commit/8a2374a41fbed115e0d877f5f8a0c86587ddd555))
+
+### 🏠 Chores
+
+* update release-it configuration to ignore recommended bumps ([a137997](https://github-lc/supercll/movie-companion-extension/commit/a137997e31e4e1c0143c404f6f94975febe68166))
+
 ## [2.2.0](https://github-lc/supercll/movie-companion-extension/compare/v2.1.1...v2.2.0) (2026-02-26)
 
 ### ✨ Features
