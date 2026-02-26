@@ -10,7 +10,8 @@
     "build:firefox": "wxt build --browser firefox",
     "zip": "wxt zip",
     "zip:firefox": "wxt zip --browser firefox",
-    "postinstall": "wxt prepare"
+    "postinstall": "wxt prepare",
+    "release": "release-it"
   },
   "dependencies": {
     "@wxt-dev/module-vue": "^1.0.3",
@@ -23,8 +24,10 @@
     "wxt": "^0.20.18"
   },
   "devDependencies": {
+    "@release-it/conventional-changelog": "^10.0.5",
     "@tailwindcss/vite": "^4.2.1",
     "@types/file-saver": "^2.0.7",
+    "release-it": "^19.2.4",
     "tailwindcss": "^4.2.1",
     "typescript": "^5.9.3",
     "vue-tsc": "^3.2.5"
