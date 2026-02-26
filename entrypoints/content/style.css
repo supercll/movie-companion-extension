@@ -65,6 +65,19 @@
   background: white;
 }
 
+.mc-recording__stop {
+  @apply ml-1 flex items-center justify-center w-6 h-6 rounded-full border-none cursor-pointer transition-colors;
+  background: rgba(255, 255, 255, 0.25);
+}
+.mc-recording__stop:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.mc-recording__stop-icon {
+  @apply block w-2.5 h-2.5 rounded-sm;
+  background: white;
+}
+
 @keyframes mc-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }

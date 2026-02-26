@@ -36,6 +36,7 @@ function showFlash() {
 
 const emit = defineEmits<{
   save: [url: string, filename: string];
+  stopRecording: [];
 }>();
 
 defineExpose({ showToast, showPreview, showRecording, showFlash });
@@ -66,6 +67,9 @@ defineExpose({ showToast, showPreview, showRecording, showFlash });
     <div class="mc-recording__bar">
       <div class="mc-recording__bar-fill" :style="{ width: `${recording.progress * 100}%` }" />
     </div>
+    <button class="mc-recording__stop" title="停止录制" @click="emit('stopRecording')">
+      <span class="mc-recording__stop-icon" />
+    </button>
   </div>
 
   <!-- Preview -->

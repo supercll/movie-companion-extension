@@ -2,7 +2,7 @@ import './style.css';
 import { createApp, type ComponentPublicInstance } from 'vue';
 import hotkeys from 'hotkeys-js';
 import { findVideo, captureVideoFrame, getTimestamp } from '@/utils/video';
-import { recordGif, isRecording } from '@/utils/gif-recorder';
+import { recordGif, isRecording, stopRecording as stopGifRecording } from '@/utils/gif-recorder';
 import { startVideoRecording, isVideoRecording, stopVideoRecording, getFormatExtension, type VideoFormat } from '@/utils/video-recorder';
 import { screenshotAtTime, screenshotAtPoints, recordGifAtRange } from '@/utils/video-seek';
 import { downloadDataUrl, downloadBlob } from '@/utils/downloader';
@@ -45,6 +45,13 @@ export default defineContentScript({
         const app = createApp(ContentOverlay, {
           onSave(url: string, filename: string) {
             downloadDataUrl(url, filename);
+          },
+          onStopRecording() {
+            if (isRecording()) {
+              stopGifRecording();
+            } else if (isVideoRecording()) {
+              stopVideoRecording();
+            }
           },
         });
         const vm = app.mount(wrapper) as ComponentPublicInstance & OverlayInstance;
