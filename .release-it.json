@@ -1,0 +1,41 @@
+{
+  "git": {
+    "commitMessage": "release: v${version}",
+    "tagName": "v${version}",
+    "tagAnnotation": "Release v${version}"
+  },
+  "npm": {
+    "publish": false
+  },
+  "github": {
+    "release": true,
+    "releaseName": "v${version}",
+    "assets": [
+      ".output/*.zip"
+    ]
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits",
+        "types": [
+          { "type": "feat", "section": "✨ Features" },
+          { "type": "fix", "section": "🐛 Bug Fixes" },
+          { "type": "perf", "section": "⚡ Performance" },
+          { "type": "refactor", "section": "♻️ Refactors" },
+          { "type": "docs", "section": "📖 Documentation" },
+          { "type": "style", "section": "💄 Styles" },
+          { "type": "chore", "section": "🏠 Chores" },
+          { "type": "build", "section": "📦 Build" },
+          { "type": "ci", "section": "🔧 CI" }
+        ]
+      },
+      "infile": "CHANGELOG.md",
+      "header": "# Changelog"
+    }
+  },
+  "hooks": {
+    "before:init": ["pnpm exec vue-tsc --noEmit"],
+    "after:bump": ["pnpm build", "pnpm zip"]
+  }
+}
