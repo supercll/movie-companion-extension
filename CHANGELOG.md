@@ -1,5 +1,11 @@
 # Changelog
 
+## [2.1.1](https://github-lc/supercll/movie-companion-extension/compare/v2.1.0...v2.1.1) (2026-02-26)
+
+### 🏠 Chores
+
+* update release-it configuration and changelog links to use GitHub domain ([3dd83f0](https://github-lc/supercll/movie-companion-extension/commit/3dd83f0c0f1dbaa369e81a5887331ace7a06f211))
+
 ## [2.1.0](https://github.com/supercll/movie-companion-extension/compare/v2.0.2...v2.1.0) (2026-02-26)
 
 ### ✨ Features
