@@ -86,7 +86,7 @@ Use keyboard shortcuts directly on video pages to trigger actions without openin
 
 ## Supported Websites
 
-Any webpage containing a `<video>` tag, including YouTube, Bilibili, Netflix, iQiyi, and more.
+Any webpage containing a `<video>` tag.
 
 ## Tech Stack
 
@@ -96,6 +96,12 @@ Any webpage containing a `<video>` tag, including YouTube, Bilibili, Netflix, iQ
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
 - [modern-gif](https://github.com/nichenqin/modern-gif) - GIF encoding
 - [vue-i18n](https://vue-i18n.intlify.dev/) - Internationalization
+
+## Disclaimer
+
+This tool is intended for personal learning and research purposes only. Users are responsible for ensuring their usage complies with applicable laws and regulations, and for respecting the intellectual property rights of content creators. This tool uses standard browser APIs and does not circumvent any DRM protections. Recording duration is capped at 120 seconds.
+
+See [DISCLAIMER.md](./DISCLAIMER.md) for the full disclaimer.
 
 ## License
 

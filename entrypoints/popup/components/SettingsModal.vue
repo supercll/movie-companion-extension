@@ -172,7 +172,7 @@ const emit = defineEmits<{
               <input
                 type="range"
                 :min="5"
-                :max="60"
+                :max="120"
                 :step="5"
                 :value="settings.videoDuration"
                 class="w-20 accent-violet-400"

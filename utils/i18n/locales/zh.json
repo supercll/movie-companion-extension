@@ -77,6 +77,7 @@
     "errorUnrecognized": "无法识别时间格式",
     "errorExceedDuration": "超出视频时长 ({time})",
     "errorEndExceed": "结束时间超出视频时长 ({time})",
+    "errorExceedMaxDuration": "录制时长不能超过 {n} 秒",
     "errorPointExceed": "时间点超出视频时长 ({time})",
     "descScreenshotAt": "在 {time} 处截图",
     "descCannotRecordPoint": "无法对单个时间点录制，请输入时间段",

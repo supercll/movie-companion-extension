@@ -86,7 +86,7 @@ pnpm release
 
 ## 支持的网站
 
-任何包含 `<video>` 标签的网页，包括 YouTube、Bilibili、Netflix、爱奇艺等。
+任何包含 `<video>` 标签的网页均可使用。
 
 ## 技术栈
 
@@ -96,6 +96,12 @@ pnpm release
 - [Tailwind CSS](https://tailwindcss.com/) - 样式
 - [modern-gif](https://github.com/nichenqin/modern-gif) - GIF 编码
 - [vue-i18n](https://vue-i18n.intlify.dev/) - 国际化
+
+## 免责声明
+
+本工具仅供个人学习和研究用途。用户应自行确保其使用行为符合所在地区的法律法规，并尊重内容创作者的知识产权。本工具使用标准浏览器 API，不会规避任何 DRM 保护。录制时长上限为 120 秒。
+
+详细免责声明请参阅 [DISCLAIMER.md](./DISCLAIMER.md)。
 
 ## 许可证
 

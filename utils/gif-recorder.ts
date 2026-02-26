@@ -1,5 +1,6 @@
 import type { Settings } from './types'
 import { encode } from 'modern-gif'
+import { MAX_RECORDING_DURATION } from './constants'
 import { t } from './i18n'
 
 export interface GifRecordingCallbacks {
@@ -31,7 +32,7 @@ export async function recordGif(
   abortController = new AbortController()
   const { signal } = abortController
 
-  const duration = settings.gifDuration * 1000
+  const duration = Math.min(settings.gifDuration, MAX_RECORDING_DURATION) * 1000
   const fps = settings.gifFps
   const frameInterval = 1000 / fps
 

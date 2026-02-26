@@ -1,6 +1,7 @@
 import type { GifRecordingCallbacks } from './gif-recorder'
 import type { Settings } from './types'
 import { encode } from 'modern-gif'
+import { MAX_RECORDING_DURATION } from './constants'
 import { t } from './i18n'
 import { captureVideoFrame, getTimestamp } from './video'
 
@@ -112,7 +113,8 @@ export async function recordGifAtRange(
 
   const fps = settings.gifFps
   const frameInterval = 1 / fps
-  const duration = endTime - startTime
+  const clampedEnd = Math.min(endTime, startTime + MAX_RECORDING_DURATION)
+  const duration = clampedEnd - startTime
 
   const maxDim = 480
   let w = video.videoWidth
@@ -136,7 +138,7 @@ export async function recordGifAtRange(
   try {
     for (let i = 0; i < totalFrames; i++) {
       const t = startTime + i * frameInterval
-      if (t > endTime)
+      if (t > clampedEnd)
         break
 
       video.currentTime = t

@@ -1,5 +1,7 @@
 import type { Settings } from './types'
 
+export const MAX_RECORDING_DURATION = 120
+
 export const DEFAULT_SETTINGS: Settings = {
   locale: 'auto',
   gifDuration: 3,

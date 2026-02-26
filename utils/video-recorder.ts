@@ -1,4 +1,5 @@
 import type { Settings } from './types'
+import { MAX_RECORDING_DURATION } from './constants'
 import { t } from './i18n'
 
 declare global {
@@ -109,7 +110,7 @@ export function startVideoRecording(
 
   activeRecorder = recorder
   const chunks: Blob[] = []
-  const duration = settings.videoDuration ?? 10
+  const duration = Math.min(settings.videoDuration ?? 10, MAX_RECORDING_DURATION)
   const startTime = Date.now()
 
   recorder.ondataavailable = (e) => {

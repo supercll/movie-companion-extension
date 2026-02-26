@@ -3,6 +3,7 @@ import type { TimedActionType, VideoInfo } from '@/utils/types'
 import { AlertCircle, Camera, Circle, Clock, Video } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { MAX_RECORDING_DURATION } from '@/utils/constants'
 import { formatTime, parseTimedInput } from '@/utils/time-parser'
 
 const props = defineProps<{
@@ -43,6 +44,8 @@ const validationError = computed(() => {
   else if (parsed.value.type === 'range') {
     if (parsed.value.end > duration)
       return t('timed.errorEndExceed', { time: formatTime(duration) })
+    if (action.value !== 'screenshot' && (parsed.value.end - parsed.value.start) > MAX_RECORDING_DURATION)
+      return t('timed.errorExceedMaxDuration', { n: MAX_RECORDING_DURATION })
   }
   else if (parsed.value.type === 'points') {
     const max = Math.max(...parsed.value.times)
