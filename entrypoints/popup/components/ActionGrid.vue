@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { Camera, Circle, Layers, Video, Settings } from 'lucide-vue-next';
+import { Camera, Circle, Layers, Video } from 'lucide-vue-next';
 
 defineEmits<{
   screenshot: [];
   gif: [];
   burst: [];
   video: [];
-  preset: [];
 }>();
 
 const btnClass =
@@ -14,7 +13,7 @@ const btnClass =
 </script>
 
 <template>
-  <div class="grid grid-cols-5 gap-2">
+  <div class="grid grid-cols-4 gap-2">
     <button :class="btnClass" title="截取当前视频画面" @click="$emit('screenshot')">
       <Camera :size="20" />
       <span>截图</span>
@@ -30,10 +29,6 @@ const btnClass =
     <button :class="btnClass" title="连续截取多张图片" @click="$emit('burst')">
       <Layers :size="20" />
       <span>连拍</span>
-    </button>
-    <button :class="btnClass" title="管理预设指令" @click="$emit('preset')">
-      <Settings :size="20" />
-      <span>预设</span>
     </button>
   </div>
 </template>

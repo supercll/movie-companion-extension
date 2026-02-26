@@ -2,10 +2,6 @@ export type ActionType = 'screenshot' | 'gif' | 'burst' | 'video';
 
 export type TimedActionType = 'screenshot' | 'gif' | 'video';
 
-export interface Preset {
-  trigger: string;
-  action: ActionType;
-}
 
 export interface Settings {
   gifDuration: number;
@@ -31,7 +27,6 @@ export type MessageAction =
   | { action: 'gif'; settings: Settings }
   | { action: 'burst'; settings: Settings }
   | { action: 'checkVideo' }
-  | { action: 'updatePresets'; presets: Preset[] }
   | { action: 'updateSettings'; settings: Settings }
   | { action: 'timedScreenshot'; time: number; settings: Settings }
   | { action: 'timedScreenshotPoints'; times: number[]; settings: Settings }

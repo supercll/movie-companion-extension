@@ -6,9 +6,9 @@ import { recordGif, isRecording } from '@/utils/gif-recorder';
 import { startVideoRecording, isVideoRecording, stopVideoRecording, getFormatExtension, type VideoFormat } from '@/utils/video-recorder';
 import { screenshotAtTime, screenshotAtPoints, recordGifAtRange } from '@/utils/video-seek';
 import { downloadDataUrl, downloadBlob } from '@/utils/downloader';
-import { presetsStorage, settingsStorage } from '@/utils/storage';
-import type { Settings, Preset } from '@/utils/types';
-import { DEFAULT_SETTINGS, DEFAULT_PRESETS } from '@/utils/constants';
+import { settingsStorage } from '@/utils/storage';
+import type { Settings } from '@/utils/types';
+import { DEFAULT_SETTINGS } from '@/utils/constants';
 import ContentOverlay from './components/ContentOverlay.vue';
 
 interface OverlayInstance {
@@ -16,7 +16,6 @@ interface OverlayInstance {
   showPreview: (url: string, filename: string, isBlob?: boolean) => void;
   showRecording: (show: boolean, progress?: number, elapsed?: number, total?: number) => void;
   showFlash: () => void;
-  showHint: (text: string) => void;
 }
 
 export default defineContentScript({
@@ -25,16 +24,11 @@ export default defineContentScript({
 
   async main(ctx) {
     let settings: Settings = { ...DEFAULT_SETTINGS };
-    let presets: Preset[] = [...DEFAULT_PRESETS];
 
     settings = (await settingsStorage.getValue()) ?? DEFAULT_SETTINGS;
-    presets = (await presetsStorage.getValue()) ?? DEFAULT_PRESETS;
 
     settingsStorage.watch((newVal) => {
       if (newVal) settings = newVal;
-    });
-    presetsStorage.watch((newVal) => {
-      if (newVal) presets = newVal;
     });
 
     // --- UI Overlay (Vue) ---
@@ -268,58 +262,6 @@ export default defineContentScript({
       if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
       recordVideo();
     });
-
-    // --- Input Monitor for Preset Triggers ---
-    function isInputElement(el: Element | null): boolean {
-      if (!el) return false;
-      const tag = el.tagName.toLowerCase();
-      return tag === 'input' || tag === 'textarea' || (el as HTMLElement).isContentEditable;
-    }
-
-    function getInputValue(el: Element): string {
-      if ((el as HTMLInputElement).value !== undefined) return (el as HTMLInputElement).value.trim();
-      if ((el as HTMLElement).isContentEditable) return (el as HTMLElement).textContent?.trim() ?? '';
-      return '';
-    }
-
-    function clearInput(el: Element) {
-      if ((el as HTMLInputElement).value !== undefined) {
-        (el as HTMLInputElement).value = '';
-      } else if ((el as HTMLElement).isContentEditable) {
-        (el as HTMLElement).textContent = '';
-      }
-    }
-
-    document.addEventListener('input', (e) => {
-      const target = e.target as Element;
-      if (!isInputElement(target)) return;
-      const value = getInputValue(target);
-      if (!value) return;
-
-      const labels: Record<string, string> = { screenshot: '截图', gif: '录制GIF', burst: '连拍' };
-      const matched = presets.find((p) => value === p.trigger);
-      if (matched) {
-        overlay?.showHint(`按 Enter 执行: ${labels[matched.action]}`);
-        return;
-      }
-      const partial = presets.find((p) => p.trigger.startsWith(value) && value.length > 0);
-      if (partial) {
-        overlay?.showHint(`输入 "${partial.trigger}" → ${labels[partial.action]}`);
-      }
-    }, true);
-
-    document.addEventListener('keydown', (e) => {
-      const target = e.target as Element;
-      if (e.key !== 'Enter' || !isInputElement(target)) return;
-      const value = getInputValue(target);
-      const matched = presets.find((p) => value === p.trigger);
-      if (matched) {
-        e.preventDefault();
-        e.stopPropagation();
-        clearInput(target);
-        executeAction(matched.action);
-      }
-    }, true);
 
     // --- Message Listener (from popup) ---
     browser.runtime.onMessage.addListener((message: Record<string, unknown>, _sender, sendResponse) => {

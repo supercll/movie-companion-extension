@@ -1,29 +1,25 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { Film } from 'lucide-vue-next';
-import type { Settings, Preset, VideoInfo } from '@/utils/types';
-import { DEFAULT_SETTINGS, DEFAULT_PRESETS } from '@/utils/constants';
-import { presetsStorage, settingsStorage } from '@/utils/storage';
+import { Film, Settings as SettingsIcon } from 'lucide-vue-next';
+import type { Settings, VideoInfo } from '@/utils/types';
+import { DEFAULT_SETTINGS } from '@/utils/constants';
+import { settingsStorage } from '@/utils/storage';
 import { getActiveTab, sendToContent } from '@/utils/messaging';
 import StatusBar from './components/StatusBar.vue';
 import ActionGrid from './components/ActionGrid.vue';
 import TimedActionPanel from './components/TimedActionPanel.vue';
-import PresetsPanel from './components/PresetsPanel.vue';
-import SettingsPanel from './components/SettingsPanel.vue';
+import SettingsModal from './components/SettingsModal.vue';
 import HelpModal from './components/HelpModal.vue';
 
 const settings = ref<Settings>({ ...DEFAULT_SETTINGS });
-const presets = ref<Preset[]>([...DEFAULT_PRESETS]);
 const videoInfo = ref<VideoInfo>({ hasVideo: false });
 const statusText = ref('等待检测视频...');
-const showPresets = ref(false);
+const showSettings = ref(false);
 const showHelp = ref(false);
 
 onMounted(async () => {
   const s = await settingsStorage.getValue();
   if (s) settings.value = s;
-  const p = await presetsStorage.getValue();
-  if (p) presets.value = p;
   await checkVideo();
 });
 
@@ -126,10 +122,6 @@ async function updateSettings(patch: Partial<Settings>) {
   await settingsStorage.setValue({ ...settings.value });
 }
 
-async function updatePresets(newPresets: Preset[]) {
-  presets.value = newPresets;
-  await presetsStorage.setValue(newPresets);
-}
 </script>
 
 <template>
@@ -144,7 +136,16 @@ async function updatePresets(newPresets: Preset[]) {
           观影伴侣
         </h1>
       </div>
-      <span class="text-[11px] text-gray-600 bg-[#1a1a2e] px-2 py-0.5 rounded-xl">v2.0</span>
+      <div class="flex items-center gap-2">
+        <button
+          class="bg-transparent border-none text-gray-500 cursor-pointer p-1.5 rounded-lg hover:bg-[#1a1a2e] hover:text-violet-400 transition-colors"
+          title="设置"
+          @click="showSettings = true"
+        >
+          <SettingsIcon :size="18" />
+        </button>
+        <span class="text-[11px] text-gray-600 bg-[#1a1a2e] px-2 py-0.5 rounded-xl">v2.0</span>
+      </div>
     </header>
 
     <StatusBar :text="statusText" :active="videoInfo.hasVideo" />
@@ -158,7 +159,6 @@ async function updatePresets(newPresets: Preset[]) {
         @gif="sendCommand('gif')"
         @video="sendCommand('video')"
         @burst="sendCommand('burst')"
-        @preset="showPresets = !showPresets"
       />
     </section>
 
@@ -167,10 +167,6 @@ async function updatePresets(newPresets: Preset[]) {
       :video-info="videoInfo"
       @execute="sendTimedAction"
     />
-
-    <PresetsPanel v-if="showPresets" :presets="presets" @update="updatePresets" />
-
-    <SettingsPanel :settings="settings" @update="updateSettings" />
 
     <footer class="flex justify-center items-center gap-2 pt-2">
       <button
@@ -187,6 +183,13 @@ async function updatePresets(newPresets: Preset[]) {
         快捷键
       </button>
     </footer>
+
+    <SettingsModal
+      v-if="showSettings"
+      :settings="settings"
+      @update="updateSettings"
+      @close="showSettings = false"
+    />
 
     <HelpModal v-if="showHelp" @close="showHelp = false" />
   </div>

@@ -21,7 +21,7 @@ const emit = defineEmits<{
           <ul class="list-disc pl-4 space-y-1 text-xs text-gray-400">
             <li>打开包含视频的网页（YouTube、B站等）</li>
             <li>点击插件图标，使用快捷操作按钮</li>
-            <li>或设置预设指令，在页面输入框中输入触发词</li>
+            <li>支持定时截图、GIF录制和视频录制</li>
           </ul>
         </div>
 
@@ -35,6 +35,10 @@ const emit = defineEmits<{
             <li>
               <kbd class="bg-[#0f0f1a] px-1.5 py-0.5 rounded text-[11px] border border-gray-700 text-violet-400">Alt+G</kbd>
               — 录制 GIF
+            </li>
+            <li>
+              <kbd class="bg-[#0f0f1a] px-1.5 py-0.5 rounded text-[11px] border border-gray-700 text-violet-400">Alt+V</kbd>
+              — 录制视频
             </li>
             <li>
               <kbd class="bg-[#0f0f1a] px-1.5 py-0.5 rounded text-[11px] border border-gray-700 text-violet-400">Alt+B</kbd>

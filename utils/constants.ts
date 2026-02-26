@@ -1,12 +1,4 @@
-import type { Preset, Settings } from './types';
-
-export const DEFAULT_PRESETS: Preset[] = [
-  { trigger: '截图', action: 'screenshot' },
-  { trigger: 'cap', action: 'screenshot' },
-  { trigger: '录制', action: 'gif' },
-  { trigger: 'gif', action: 'gif' },
-  { trigger: '连拍', action: 'burst' },
-];
+import type { Settings } from './types';
 
 export const DEFAULT_SETTINGS: Settings = {
   gifDuration: 3,
@@ -17,11 +9,4 @@ export const DEFAULT_SETTINGS: Settings = {
   videoDuration: 10,
   videoFormat: 'auto',
   videoBitrate: 2500,
-};
-
-export const ACTION_LABELS: Record<string, string> = {
-  screenshot: '截图',
-  gif: '录制GIF',
-  burst: '连拍(5张)',
-  video: '录制视频',
 };

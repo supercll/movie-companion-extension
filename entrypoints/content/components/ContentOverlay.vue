@@ -5,13 +5,10 @@ const toast = ref<{ text: string; type: string } | null>(null);
 const preview = ref<{ url: string; filename: string; isBlob: boolean } | null>(null);
 const recording = ref<{ progress: number; elapsed: number; total: number } | null>(null);
 const flash = ref(false);
-const hint = ref<string | null>(null);
-
 const globalURL = globalThis.URL;
 
 let toastTimer: ReturnType<typeof setTimeout> | undefined;
 let previewTimer: ReturnType<typeof setTimeout> | undefined;
-let hintTimer: ReturnType<typeof setTimeout> | undefined;
 
 function showToast(text: string, type: string) {
   clearTimeout(toastTimer);
@@ -37,17 +34,11 @@ function showFlash() {
   setTimeout(() => (flash.value = false), 300);
 }
 
-function showHint(text: string) {
-  clearTimeout(hintTimer);
-  hint.value = text;
-  hintTimer = setTimeout(() => (hint.value = null), 3000);
-}
-
 const emit = defineEmits<{
   save: [url: string, filename: string];
 }>();
 
-defineExpose({ showToast, showPreview, showRecording, showFlash, showHint });
+defineExpose({ showToast, showPreview, showRecording, showFlash });
 </script>
 
 <template>
@@ -96,6 +87,4 @@ defineExpose({ showToast, showPreview, showRecording, showFlash, showHint });
     </div>
   </div>
 
-  <!-- Command Hint -->
-  <div v-if="hint" class="mc-hint">{{ hint }}</div>
 </template>
