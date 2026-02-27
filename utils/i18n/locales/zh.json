@@ -105,6 +105,7 @@
     "videoFormat": "视频格式",
     "autoBest": "自动(最佳)",
     "bitrate": "码率",
+    "unsupported": "不支持",
     "done": "完成",
     "seconds": "{n}秒"
   },

@@ -105,6 +105,7 @@
     "videoFormat": "Format",
     "autoBest": "Auto (Best)",
     "bitrate": "Bitrate",
+    "unsupported": "unsupported",
     "done": "Done",
     "seconds": "{n}s"
   },

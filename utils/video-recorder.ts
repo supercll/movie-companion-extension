@@ -12,23 +12,45 @@ export type VideoFormat = 'webm-vp9' | 'webm-h264' | 'mp4' | 'webm'
 
 export interface VideoRecordingCallbacks {
   onProgress: (elapsed: number, total: number) => void
-  onComplete: (blob: Blob, duration: number) => void
+  onComplete: (blob: Blob, duration: number, format: VideoFormat) => void
   onError: (error: string) => void
 }
 
-const FORMAT_MIME: Record<VideoFormat, string> = {
-  'mp4': 'video/mp4;codecs=h264,aac',
-  'webm-h264': 'video/webm;codecs=h264',
-  'webm-vp9': 'video/webm;codecs=vp9,opus',
-  'webm': 'video/webm',
+const FORMAT_CANDIDATES: Record<VideoFormat, string[]> = {
+  'mp4': [
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'video/mp4;codecs=avc1,mp4a',
+    'video/mp4',
+  ],
+  'webm-vp9': [
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp9',
+  ],
+  'webm-h264': [
+    'video/webm;codecs=h264',
+    'video/webm;codecs=avc1',
+  ],
+  'webm': [
+    'video/webm;codecs=vp8,opus',
+    'video/webm;codecs=vp8',
+    'video/webm',
+  ],
+}
+
+function resolveMime(format: VideoFormat): string | null {
+  for (const mime of FORMAT_CANDIDATES[format]) {
+    if (MediaRecorder.isTypeSupported(mime))
+      return mime
+  }
+  return null
 }
 
 export function detectBestFormat(): { format: VideoFormat, mimeType: string } {
   const preferred: VideoFormat[] = ['mp4', 'webm-vp9', 'webm-h264', 'webm']
   for (const fmt of preferred) {
-    if (MediaRecorder.isTypeSupported(FORMAT_MIME[fmt])) {
-      return { format: fmt, mimeType: FORMAT_MIME[fmt] }
-    }
+    const mime = resolveMime(fmt)
+    if (mime)
+      return { format: fmt, mimeType: mime }
   }
   return { format: 'webm', mimeType: 'video/webm' }
 }
@@ -86,8 +108,11 @@ export function startVideoRecording(
   }
   else {
     format = userFormat as VideoFormat
-    mimeType = FORMAT_MIME[format]
-    if (!MediaRecorder.isTypeSupported(mimeType)) {
+    const resolved = resolveMime(format)
+    if (resolved) {
+      mimeType = resolved
+    }
+    else {
       const fallback = detectBestFormat()
       mimeType = fallback.mimeType
       format = fallback.format
@@ -129,7 +154,7 @@ export function startVideoRecording(
 
     const blob = new Blob(chunks, { type: mimeType })
     const elapsed = (Date.now() - startTime) / 1000
-    callbacks.onComplete(blob, elapsed)
+    callbacks.onComplete(blob, elapsed, format)
   }
 
   recorder.onerror = () => {

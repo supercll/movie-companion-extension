@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Settings } from '@/utils/types'
 import { Settings as SettingsIcon, X } from 'lucide-vue-next'
+import { computed } from 'vue'
 
 defineProps<{
   settings: Settings
@@ -10,6 +11,19 @@ const emit = defineEmits<{
   update: [patch: Partial<Settings>]
   close: []
 }>()
+
+function isMimeSupported(...mimes: string[]): boolean {
+  if (typeof MediaRecorder === 'undefined')
+    return false
+  return mimes.some(m => MediaRecorder.isTypeSupported(m))
+}
+
+const formatOptions = computed(() => [
+  { value: 'mp4' as const, label: 'MP4 (H264)', supported: isMimeSupported('video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4;codecs=avc1,mp4a', 'video/mp4') },
+  { value: 'webm-vp9' as const, label: 'WebM (VP9)', supported: isMimeSupported('video/webm;codecs=vp9,opus', 'video/webm;codecs=vp9') },
+  { value: 'webm-h264' as const, label: 'WebM (H264)', supported: isMimeSupported('video/webm;codecs=h264', 'video/webm;codecs=avc1') },
+  { value: 'webm' as const, label: 'WebM', supported: isMimeSupported('video/webm;codecs=vp8,opus', 'video/webm;codecs=vp8', 'video/webm') },
+])
 </script>
 
 <template>
@@ -192,17 +206,13 @@ const emit = defineEmits<{
               <option value="auto">
                 {{ $t('settings.autoBest') }}
               </option>
-              <option value="mp4">
-                MP4 (H264)
-              </option>
-              <option value="webm-vp9">
-                WebM (VP9)
-              </option>
-              <option value="webm-h264">
-                WebM (H264)
-              </option>
-              <option value="webm">
-                WebM
+              <option
+                v-for="opt in formatOptions"
+                :key="opt.value"
+                :value="opt.value"
+                :disabled="!opt.supported"
+              >
+                {{ opt.label }}{{ opt.supported ? '' : ` (${$t('settings.unsupported')})` }}
               </option>
             </select>
           </div>

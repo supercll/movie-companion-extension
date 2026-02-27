@@ -1,6 +1,5 @@
 import type { ComponentPublicInstance } from 'vue'
 import type { Settings } from '@/utils/types'
-import type { VideoFormat } from '@/utils/video-recorder'
 import hotkeys from 'hotkeys-js'
 import { createApp } from 'vue'
 import { DEFAULT_SETTINGS } from '@/utils/constants'
@@ -234,10 +233,9 @@ export default defineContentScript({
         onProgress(elapsed, total) {
           overlay?.showRecording(true, elapsed / total, elapsed, total)
         },
-        onComplete(blob, duration) {
+        onComplete(blob, duration, format) {
           overlay?.showRecording(false)
-          const fmt = (settings.videoFormat === 'auto' ? 'webm' : settings.videoFormat) as VideoFormat
-          const ext = getFormatExtension(fmt)
+          const ext = getFormatExtension(format)
           const filename = `movie-companion-${getTimestamp()}.${ext}`
           downloadBlob(blob, filename)
           overlay?.showToast(t('toast.videoDone', { n: duration.toFixed(1) }), 'success')
@@ -367,14 +365,13 @@ export default defineContentScript({
             onProgress(elapsed, total) {
               overlay?.showRecording(true, elapsed / total, elapsed, total)
             },
-            onComplete(blob, duration) {
+            onComplete(blob, duration, format) {
               overlay?.showRecording(false)
               if (wasPlaying)
                 tvideo.play()
               else
                 tvideo.pause()
-              const fmt = (settings.videoFormat === 'auto' ? 'webm' : settings.videoFormat) as VideoFormat
-              const ext = getFormatExtension(fmt)
+              const ext = getFormatExtension(format)
               const filename = `movie-companion-${getTimestamp()}.${ext}`
               downloadBlob(blob, filename)
               overlay?.showToast(t('toast.videoDone', { n: duration.toFixed(1) }), 'success')
