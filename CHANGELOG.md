@@ -1,5 +1,16 @@
 # Changelog
 
+## [2.2.3](https://github.com/supercll/movie-companion-extension/compare/v2.2.2...v2.2.3) (2026-02-27)
+
+### ✨ Features
+
+* add disclaimer and update README with usage guidelines ([a4f791c](https://github.com/supercll/movie-companion-extension/commit/a4f791c8b03b6508b7794eaaf027397df60fce50))
+* add ESLint configuration and license file ([15e1295](https://github.com/supercll/movie-companion-extension/commit/15e1295f65ecf21e53ebfaa98f3c531d8720820d))
+
+### 🐛 Bug Fixes
+
+* enhance video format support ([3f5ecee](https://github.com/supercll/movie-companion-extension/commit/3f5eceefd1a2eef670e4291c5b8a78036b96dcd0))
+
 ## [2.2.2](https://github.com/supercll/movie-companion-extension/compare/v2.2.1...v2.2.2) (2026-02-26)
 
 ### ✨ Features
